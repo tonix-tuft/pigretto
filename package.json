@@ -1,0 +1,38 @@
+{
+  "name": "pigretto",
+  "version": "1.0.0",
+  "description": "A JS helper to easily implement proxies, facades, lazy loading and monkey patching using an API with an AOP flavor.",
+  "keywords": [
+    "proxy",
+    "lazy-loading",
+    "lazy",
+    "monkey-patching"
+  ],
+  "author": "Anton Bagdatyev (Tonix-Tuft)",
+  "license": "MIT",
+  "main": "./dist/pigretto.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tonix-tuft/pigretto.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "WEBPACK_ENV=watch webpack --progress --colors --watch",
+    "build": "WEBPACK_ENV=build webpack"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.16.0",
+    "@typescript-eslint/parser": "^2.16.0",
+    "eslint": "^6.8.0",
+    "serialize-javascript": "^2.1.2",
+    "terser-webpack-plugin": "^1.4.3",
+    "typescript": "^3.7.4",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10"
+  },
+  "bugs": {
+    "url": "https://github.com/tonix-tuft/pigretto/issues"
+  },
+  "homepage": "https://github.com/tonix-tuft/pigretto#readme",
+  "dependencies": {}
+}
