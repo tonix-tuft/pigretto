@@ -10,7 +10,8 @@
   ],
   "author": "Anton Bagdatyev (Tonix-Tuft)",
   "license": "MIT",
-  "main": "./dist/pigretto.js",
+  "main": "dist/pigretto.js",
+  "module": "src/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/tonix-tuft/pigretto.git"
@@ -18,15 +19,17 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "WEBPACK_ENV=watch webpack --progress --colors --watch",
-    "build": "WEBPACK_ENV=build webpack"
+    "dev-build": "WEBPACK_ENV=watch webpack --progress --colors",
+    "build": "WEBPACK_ENV=build webpack",
+    "publish-minor": "npm run build && npm run dev-build && npm version minor && npm publish && git push && git push --tags"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^2.16.0",
-    "@typescript-eslint/parser": "^2.16.0",
+    "@typescript-eslint/eslint-plugin": "^2.19.0",
+    "@typescript-eslint/parser": "^2.19.0",
     "eslint": "^6.8.0",
     "serialize-javascript": "^2.1.2",
     "terser-webpack-plugin": "^1.4.3",
-    "typescript": "^3.7.4",
+    "typescript": "^3.7.5",
     "webpack": "^4.41.5",
     "webpack-cli": "^3.3.10"
   },
@@ -34,5 +37,12 @@
     "url": "https://github.com/tonix-tuft/pigretto/issues"
   },
   "homepage": "https://github.com/tonix-tuft/pigretto#readme",
-  "dependencies": {}
+  "dependencies": {
+    "declarative-factory": "^1.4.0",
+    "js-utl": "^2.19.0"
+  },
+  "files": [
+    "dist",
+    "src"
+  ]
 }
