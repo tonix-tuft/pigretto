@@ -68,6 +68,7 @@ function pigretto(target, proxyRules) {
 /*
  * Mapping the API properties to the pigretto function.
  */
+pigretto.pointcuts = {};
 [
   ["call", call],
   ["get", get],
@@ -76,7 +77,7 @@ function pigretto(target, proxyRules) {
   ["apply", apply],
   ["constructRule", constructRule],
   ["construct", construct]
-].map(([prop, val]) => (pigretto[prop] = val));
+].map(([prop, val]) => (pigretto.pointcuts[prop] = val));
 
 export default pigretto;
 export { call, get, set, applyRule, apply, constructRule, construct };
