@@ -41,6 +41,8 @@ export default withFunctionTrapExecutor(
       if (typeof propertyValue === "function") {
         if (propertyValue.isBound()) {
           propertyValue = propertyValue.bind(propertyValue.bindContextThisArg);
+        } else {
+          propertyValue = propertyValue.bind(target);
         }
         const wrapperFn = (...args) => {
           const trapArgs = [target, property, receiver, propertyValue, args];
