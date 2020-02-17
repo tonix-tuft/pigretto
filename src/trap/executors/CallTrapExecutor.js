@@ -41,7 +41,7 @@ export default withFunctionTrapExecutor(
     ) {
       if (typeof propertyValue === "function") {
         const superExecute = trapArgs => {
-          super.execute(trapArgs, before, around, after);
+          return super.execute(trapArgs, before, around, after);
         };
         const wrapperFn = function(...args) {
           let boundThis;
