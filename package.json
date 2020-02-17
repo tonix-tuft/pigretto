@@ -24,9 +24,14 @@
     "publish-minor": "npm run build && npm run dev-build && npm version minor && npm publish && git push && git push --tags"
   },
   "devDependencies": {
+    "@babel/core": "^7.8.4",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/preset-env": "^7.8.4",
     "@typescript-eslint/eslint-plugin": "^2.19.0",
     "@typescript-eslint/parser": "^2.19.0",
+    "babel-loader": "^8.0.6",
     "eslint": "^6.8.0",
+    "eslint-loader": "^3.0.3",
     "serialize-javascript": "^2.1.2",
     "terser-webpack-plugin": "^1.4.3",
     "typescript": "^3.7.5",

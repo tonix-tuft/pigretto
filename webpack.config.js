@@ -29,12 +29,20 @@ var config = {
   module: {
     rules: [
       {
-        test: /(\\.jsx|\\.js)$/,
+        test: /(\.jsx|\.js)$/,
+        exclude: /(node_modules|bower_components)/,
         loader: "babel-loader",
-        exclude: /(node_modules|bower_components)/
+        options: {
+          presets: [
+            "@babel/preset-env",
+            {
+              plugins: ["@babel/plugin-proposal-class-properties"]
+            }
+          ]
+        }
       },
       {
-        test: /(\\.jsx|\\.js)$/,
+        test: /(\.jsx|\.js)$/,
         loader: "eslint-loader",
         exclude: /node_modules/
       }
