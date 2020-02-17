@@ -89,17 +89,19 @@ export default class SetTrapExecutor extends TrapExecutor {
     [target, property, value, receiver],
     advice,
     rule,
-    newPropertyValue
+    updateWasSuccessful
   ) {
     const previousPropertyValue = this.previousPropertyValueMap[
       this.execContextID
     ];
+    const newPropertyValue = this.returnNewPropertyValueMap[this.execContextID];
     const context = {
       target,
       property,
       value,
       receiver,
-      rule
+      rule,
+      updateWasSuccessful
     };
     advice.fn(previousPropertyValue).apply(context, [newPropertyValue]);
   }
