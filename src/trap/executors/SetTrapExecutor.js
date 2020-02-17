@@ -107,7 +107,8 @@ export default class SetTrapExecutor extends TrapExecutor {
   performUnderlyingOperation([target, property, value, receiver]) {
     const updateWasSuccessful = reflectSet(target, property, value, receiver);
     this.updateWasSuccessfulMap[this.execContextID] = updateWasSuccessful;
-    return updateWasSuccessful;
+    this.returnNewPropertyValueMap[this.execContextID] = value;
+    return value;
   }
 
   executeProceedCallback(
@@ -129,8 +130,7 @@ export default class SetTrapExecutor extends TrapExecutor {
 
   return([target, property, , receiver], returnValue) {
     if (returnValue !== this.returnNewPropertyValueMap[this.execContextID]) {
-      this.returnNewPropertyValueMap[this.execContextID] = returnValue;
-      return this.performUnderlyingOperation([
+      this.performUnderlyingOperation([
         target,
         property,
         returnValue,
