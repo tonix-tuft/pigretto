@@ -8,7 +8,7 @@
     "lazy",
     "monkey-patching"
   ],
-  "author": "Anton Bagdatyev (Tonix-Tuft)",
+  "author": "Anton Bagdatyev (Tonix)",
   "license": "MIT",
   "main": "dist/pigretto.js",
   "module": "src/index.js",
