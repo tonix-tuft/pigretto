@@ -37,7 +37,7 @@ const exactRule = property => new ExactRule(property);
 
 const parseSingle = ruleToParse => {
   let factoryParam = ruleToParse;
-  const factory = declarativeFactory(
+  const factory = declarativeFactory([
     [() => ruleToParse instanceof RegExp, regexRule],
     [
       () => {
@@ -63,7 +63,7 @@ const parseSingle = ruleToParse => {
       regexRule
     ],
     exactRule
-  );
+  ]);
   return factory(factoryParam);
 };
 

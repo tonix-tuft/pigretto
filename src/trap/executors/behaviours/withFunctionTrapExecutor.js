@@ -42,7 +42,7 @@ export const withFunctionTrapExecutor = superclass => {
       super.startExecutionContext(trapArgs);
       if (
         !this.executedAtLeastOnce &&
-        Object.prototype.hasOwnProperty.call(this, "execContextID")
+        !Object.prototype.hasOwnProperty.call(this, "execContextID")
       ) {
         throw new Error(
           `pigretto - ${superclass.name} trap executor does not have "execContextID" property.`
@@ -74,7 +74,7 @@ export const withFunctionTrapExecutor = superclass => {
       const argumentsListIndex = this.getTrapArgsArgumentsListIndex();
       if (
         !this.executedAtLeastOnce &&
-        Object.prototype.hasOwnProperty.call(this, "execContextStack")
+        !Object.prototype.hasOwnProperty.call(this, "execContextStack")
       ) {
         throw new Error(
           `pigretto - ${superclass.name} trap executor does not have "execContextStack" property.`
@@ -161,6 +161,9 @@ export const withFunctionTrapExecutor = superclass => {
       );
     }
   };
-  NewClass.name = superclass.name;
+  Object.defineProperty(NewClass, "name", {
+    writable: true,
+    value: `WithFunctionTrapExecutor(${superclass.name})`
+  });
   return NewClass;
 };

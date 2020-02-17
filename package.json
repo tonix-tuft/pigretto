@@ -43,8 +43,10 @@
   },
   "homepage": "https://github.com/tonix-tuft/pigretto#readme",
   "dependencies": {
+    "core-js": "^3.6.4",
     "declarative-factory": "^1.4.0",
-    "js-utl": "^2.19.0"
+    "js-utl": "^2.19.0",
+    "regenerator-runtime": "^0.13.3"
   },
   "files": [
     "dist",
