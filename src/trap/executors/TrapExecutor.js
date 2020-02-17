@@ -236,7 +236,7 @@ export default class TrapExecutor {
     for (const { fn: callback, rule } of this.execContextStack[
       this.execContextID
     ].proceeds) {
-      if (typeof fn === "function") {
+      if (typeof callback === "function") {
         returnValue = this.executeProceedCallback(
           trapArgs,
           rule,
