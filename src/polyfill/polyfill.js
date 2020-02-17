@@ -23,19 +23,24 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @type {Symbol}
+ */
+export const bindContextThisArg = Symbol("bindContextThisArg");
+
 (function(bind) {
   Object.defineProperties(Function.prototype, {
     bind: {
       value: function(...args) {
         const thisArg = args[0];
         const boundFn = bind.apply(this, args);
-        boundFn.bindContextThisArg = thisArg;
+        boundFn[bindContextThisArg] = thisArg;
         return boundFn;
       }
     },
     isBound: {
       value: function() {
-        return Object.prototype.hasOwnProperty.call(this, "bindContextThisArg");
+        return Object.prototype.hasOwnProperty.call(this, bindContextThisArg);
       }
     }
   });

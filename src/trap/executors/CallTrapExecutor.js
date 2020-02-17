@@ -25,6 +25,7 @@
 
 import TrapExecutor from "./TrapExecutor";
 import { withFunctionTrapExecutor } from "./behaviours/withFunctionTrapExecutor";
+import { bindContextThisArg } from "../../polyfill/polyfill";
 
 export default withFunctionTrapExecutor(
   class CallTrapExecutor extends TrapExecutor {
@@ -39,14 +40,21 @@ export default withFunctionTrapExecutor(
       after
     ) {
       if (typeof propertyValue === "function") {
-        if (propertyValue.isBound()) {
-          propertyValue = propertyValue.bind(propertyValue.bindContextThisArg);
-        } else {
-          propertyValue = propertyValue.bind(target);
-        }
-        const wrapperFn = (...args) => {
+        const superExecute = trapArgs => {
+          super.execute(trapArgs, before, around, after);
+        };
+        const wrapperFn = function(...args) {
+          let boundThis;
+          if (this !== receiver) {
+            boundThis = this;
+          } else if (propertyValue.isBound()) {
+            boundThis = propertyValue[bindContextThisArg];
+          } else {
+            boundThis = target;
+          }
+          propertyValue = propertyValue.bind(boundThis);
           const trapArgs = [target, property, receiver, propertyValue, args];
-          return super.execute(trapArgs, before, around, after);
+          return superExecute(trapArgs);
         };
         return wrapperFn;
       }
