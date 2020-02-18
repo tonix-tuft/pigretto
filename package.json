@@ -11,7 +11,7 @@
   "author": "Anton Bagdatyev (Tonix)",
   "license": "MIT",
   "main": "dist/pigretto.js",
-  "module": "src/index.js",
+  "module": "dist/es6/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/tonix-tuft/pigretto.git"
@@ -22,17 +22,22 @@
     "dev-build": "WEBPACK_ENV=watch webpack --progress --colors",
     "build": "WEBPACK_ENV=build webpack",
     "publish-git": "npm publish && git push && git push --tags",
-    "publish-patch": "npm run build && npm run dev-build && npm version patch && npm run publish-git",
-    "publish-minor": "npm run build && npm run dev-build && npm version minor && npm run publish-git",
-    "publish-major": "npm run build && npm run dev-build && npm version major && npm run publish-git"
+    "build-all": "npm run build && npm run dev-build && npm run build-module",
+    "publish-patch": "npm run build-all && npm version patch && npm run publish-git",
+    "publish-minor": "npm run build-all && npm version minor && npm run publish-git",
+    "publish-major": "npm run build-all && npm version major && npm run publish-git",
+    "build-module": "cross-env BABEL_ENV=module ./node_modules/.bin/babel ./src --out-dir ./dist/es6 --source-maps --copy-files"
   },
   "devDependencies": {
+    "@babel/cli": "^7.8.4",
     "@babel/core": "^7.8.4",
     "@babel/plugin-proposal-class-properties": "^7.8.3",
     "@babel/preset-env": "^7.8.4",
     "@typescript-eslint/eslint-plugin": "^2.19.0",
     "@typescript-eslint/parser": "^2.19.0",
     "babel-loader": "^8.0.6",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "eslint": "^6.8.0",
     "eslint-loader": "^3.0.3",
     "serialize-javascript": "^2.1.2",
