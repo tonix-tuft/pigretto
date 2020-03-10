@@ -36,7 +36,7 @@ export default class RegexRule extends Rule {
     // This line resets the state of the RegExp object.
     this.regex.lastIndex = 0;
     return (
-      typeof effectivePropertyName === "string" &&
+      typeof effectivePropertyName !== "symbol" &&
       this.regex.test(effectivePropertyName)
     );
   }
