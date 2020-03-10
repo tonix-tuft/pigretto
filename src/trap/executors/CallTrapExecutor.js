@@ -26,6 +26,7 @@
 import TrapExecutor from "./TrapExecutor";
 import { withFunctionTrapExecutor } from "./behaviours/withFunctionTrapExecutor";
 import { bindContextThisArg } from "../../polyfill/polyfill";
+import { isEmpty } from "js-utl";
 
 export default withFunctionTrapExecutor(
   class CallTrapExecutor extends TrapExecutor {
@@ -39,7 +40,10 @@ export default withFunctionTrapExecutor(
       around,
       after
     ) {
-      if (typeof propertyValue === "function") {
+      if (
+        typeof propertyValue === "function" &&
+        [before, around, after].some(advices => !isEmpty(advices))
+      ) {
         const superExecute = trapArgs => {
           return super.execute(trapArgs, before, around, after);
         };
