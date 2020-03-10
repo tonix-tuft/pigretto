@@ -81,7 +81,9 @@ export default function lazyObject(
       properties.map(
         property =>
           (propertiesMap[property] = {
-            isMethod: typeof target[property] === "function"
+            isMethod:
+              property !== "constructor" &&
+              typeof target[property] === "function"
           })
       );
     }
