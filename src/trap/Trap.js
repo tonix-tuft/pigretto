@@ -105,7 +105,7 @@ export default class Trap {
   /**
    * @private
    */
-  lazyDistributeAdvices(pointcutType) {
+  lazilyDistributeAdvices(pointcutType) {
     if (isUndefined(this.distributedAdvices[pointcutType].before)) {
       this.distributedAdvices[pointcutType].before = [];
       this.distributedAdvices[pointcutType].around = [];
@@ -126,8 +126,8 @@ export default class Trap {
    *
    * @private
    */
-  lazyMatchAdvices(pointcutType, property) {
-    this.lazyDistributeAdvices(pointcutType);
+  lazilyMatchAdvices(pointcutType, property) {
+    this.lazilyDistributeAdvices(pointcutType);
     const map = this.matchedDistributedAdvices[pointcutType];
     if (!map.has(property)) {
       const node = {
@@ -225,8 +225,8 @@ export default class Trap {
 
   get(target, property, receiver) {
     // Method call and property access (getting) advices.
-    this.lazyMatchAdvices("get", property);
-    this.lazyMatchAdvices("call", property);
+    this.lazilyMatchAdvices("get", property);
+    this.lazilyMatchAdvices("call", property);
     const {
       before: getBefore,
       around: getAround,
@@ -256,7 +256,7 @@ export default class Trap {
 
   set(target, property, value, receiver) {
     // Property access (setting) advices.
-    this.lazyMatchAdvices("set", property);
+    this.lazilyMatchAdvices("set", property);
     const { before, around, after } = this.matchedDistributedAdvices.set.get(
       property
     );
@@ -270,7 +270,7 @@ export default class Trap {
 
   apply(target, thisArg, argumentsList) {
     // Function call advices.
-    this.lazyDistributeAdvices("apply");
+    this.lazilyDistributeAdvices("apply");
     const { before, around, after } = this.distributedAdvices.apply;
     return this.trapExecutors.apply.execute(
       [target, thisArg, argumentsList],
@@ -282,7 +282,7 @@ export default class Trap {
 
   construct(target, argumentsList, newTarget) {
     // Object construction via the "new" keyword advices.
-    this.lazyDistributeAdvices("construct");
+    this.lazilyDistributeAdvices("construct");
     const { before, around, after } = this.distributedAdvices.construct;
     return this.trapExecutors.construct.execute(
       [target, argumentsList, newTarget],

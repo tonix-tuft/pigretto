@@ -34,6 +34,7 @@ import get from "./pointcuts/shorthands/get";
 import set from "./pointcuts/shorthands/set";
 import apply from "./pointcuts/shorthands/apply";
 import construct from "./pointcuts/shorthands/construct";
+import lazyObject from "./builtin/lazyObject";
 
 /**
  * Generates a new pigretto proxy object.
@@ -79,5 +80,11 @@ pigretto.pointcuts = {};
   ["construct", construct]
 ].map(([prop, val]) => (pigretto.pointcuts[prop] = val));
 
+pigretto.builtin = {};
+[["lazyObject", lazyObject]].map(
+  ([prop, val]) => (pigretto.builtin[prop] = val)
+);
+
 export default pigretto;
 export { call, get, set, applyRule, apply, constructRule, construct };
+export { lazyObject };

@@ -24,9 +24,10 @@
  */
 
 /**
- * @type {Symbol}
+ * @type {string}
  */
-export const bindContextThisArg = Symbol("bindContextThisArg");
+export const bindContextThisArg =
+  "pigrettoBindContextThisArgRpQTkhkRxgErf3hewa8q";
 
 (function(bind) {
   Object.defineProperties(Function.prototype, {
@@ -41,7 +42,8 @@ export const bindContextThisArg = Symbol("bindContextThisArg");
     isBound: {
       value: function() {
         return Object.prototype.hasOwnProperty.call(this, bindContextThisArg);
-      }
+      },
+      configurable: true
     }
   });
 })(Function.prototype.bind);
