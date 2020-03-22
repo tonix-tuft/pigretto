@@ -23,8 +23,6 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import "core-js/stable";
-import "regenerator-runtime/runtime";
 import "./polyfill/polyfill";
 import handlerFactory from "./factory/handlerFactory";
 import applyRule from "./rules/applyRule";
