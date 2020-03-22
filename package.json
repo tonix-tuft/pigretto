@@ -19,7 +19,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "WEBPACK_ENV=watch webpack --progress --colors --watch",
-    "dev-build": "WEBPACK_ENV=watch webpack --progress --colors",
+    "dev-build": "WEBPACK_ENV=dev webpack --progress --colors",
     "build": "WEBPACK_ENV=build webpack",
     "publish-git": "npm publish && git push && git push --tags",
     "build-all": "npm run build && npm run dev-build && npm run build-module",
