@@ -23,7 +23,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import pigretto from "..";
+import pigretto from "../pigretto";
 import call from "../pointcuts/shorthands/call";
 import set from "../pointcuts/shorthands/set";
 import get from "../pointcuts/shorthands/get";
