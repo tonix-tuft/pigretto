@@ -87,7 +87,7 @@ export default function lazyObject(
           })
       );
     }
-    current = current.__proto__;
+    current = Object.getPrototypeOf(current);
     currentIsProto = true;
   }
   propertiesToIgnore.map(
@@ -107,7 +107,7 @@ export default function lazyObject(
 
   const properties = Object.keys(propertiesMap);
   let firstOperation = true;
-  const callback = function(...args) {
+  const callback = function (...args) {
     if (firstOperation) {
       firstOperation = false;
       onceCallback.apply(this, args);
