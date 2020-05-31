@@ -57,4 +57,4 @@ pigretto.builtin = {};
 
 export default pigretto;
 export { call, get, set, applyRule, apply, constructRule, construct };
-export { lazyObject };
+export { lazyObject, throwErrorForUnknownProperty };
