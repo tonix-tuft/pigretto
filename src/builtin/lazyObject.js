@@ -60,8 +60,8 @@ export default function lazyObject(
     ignoredTypes = [Object],
     interceptConstructor = false,
     propertiesToIgnore = [],
-    pointcuts = [call, get, set]
-  }
+    pointcuts = [call, get, set],
+  } = {}
 ) {
   let hasCall = false,
     hasGet = false,
@@ -83,7 +83,7 @@ export default function lazyObject(
           (propertiesMap[property] = {
             isMethod:
               property !== "constructor" &&
-              typeof target[property] === "function"
+              typeof target[property] === "function",
           })
       );
     }

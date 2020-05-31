@@ -33,6 +33,7 @@ import set from "./pointcuts/shorthands/set";
 import apply from "./pointcuts/shorthands/apply";
 import construct from "./pointcuts/shorthands/construct";
 import lazyObject from "./builtin/lazyObject";
+import throwErrorForUnknownProperty from "./builtin/throwErrorForUnknownProperty";
 
 /*
  * Mapping the API properties to the pigretto function.
@@ -45,13 +46,14 @@ pigretto.pointcuts = {};
   ["applyRule", applyRule],
   ["apply", apply],
   ["constructRule", constructRule],
-  ["construct", construct]
+  ["construct", construct],
 ].map(([prop, val]) => (pigretto.pointcuts[prop] = val));
 
 pigretto.builtin = {};
-[["lazyObject", lazyObject]].map(
-  ([prop, val]) => (pigretto.builtin[prop] = val)
-);
+[
+  ["lazyObject", lazyObject],
+  ["throwErrorForUnknownProperty", throwErrorForUnknownProperty],
+].map(([prop, val]) => (pigretto.builtin[prop] = val));
 
 export default pigretto;
 export { call, get, set, applyRule, apply, constructRule, construct };
