@@ -37,8 +37,15 @@ import { prototypeChainProperties, typeToStr } from "js-utl";
  * @param {boolean} [options.dynamic] Whether or not to check against the current properties of the target on each property access (dynamic, default).
  *                                    If set to false, then only the properties of the target object at the time this builtin function is called will be
  *                                    treated as known and used for the check when determining if a property is unknown.
- * @param {?Error} [options.errorToThrow] The error to throw or null (default). If null, a default error will be thrown
- *                                        when trying to access an unknown property.
+ * @param {?Error|Function} [options.errorToThrow] The error to throw or null (default) or a function returning an error instance to throw.
+ *                                                 If null, a default error will be thrown when trying to access an unknown property.
+ *                                                 If a function is given, the function will receive an object with the following properties as parameter:
+ *
+ *                                                     - target (Object): The target object;
+ *                                                     - propertyName (string): The name of the unknown property;
+ *                                                     - targetTypeToStr (string): The type of the target (e.g. "[object Object]");
+ *                                                     - defaultErrorMessage (string): A default error message which can be used for the custom error;
+ *
  * @param {Object} [options.prototypeChainPropertiesOptions] Further options passed to the "prototypeChainProperties" function of js-utl (used internally).
  *                                                           See the "prototypeChainProperties" function of the js-utl package (https://github.com/tonix-tuft/js-utl)
  *                                                           for the available options.
@@ -63,15 +70,20 @@ export default function throwErrorForUnknownProperty(
   !dynamic && mapProperties();
   const assertFn = function () {
     const propertyName = this.property;
+    const targetTypeToStr = typeToStr(target);
+    const defaultErrorMessage = `Accessing unknown property "${propertyName}" of object ${targetTypeToStr}.`;
     dynamic && mapProperties();
     if (!map[propertyName]) {
-      errorToThrow =
-        errorToThrow ||
-        new Error(
-          `Accessing unknown property "${propertyName}" of object ${typeToStr(
-            target
-          )}.`
-        );
+      errorToThrow = errorToThrow
+        ? typeof errorToThrow === "function"
+          ? errorToThrow({
+              target,
+              propertyName,
+              targetTypeToStr,
+              defaultErrorMessage,
+            })
+          : errorToThrow
+        : new Error(defaultErrorMessage);
       throw errorToThrow;
     }
   };
