@@ -1,6 +1,6 @@
 {
   "name": "pigretto",
-  "version": "2.17.0",
+  "version": "2.18.0",
   "description": "A JS helper to easily implement proxies, facades, lazy loading and monkey patching using an API with an AOP flavor.",
   "keywords": [
     "proxy",
