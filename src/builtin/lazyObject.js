@@ -51,7 +51,7 @@ import escapeStringRegexp from "escape-string-regexp";
  * @param {Array} [options.pointcuts] Array of pointcut shorthands to use for interception and lazy loading.
  *                                    By default, only "call", "get" and "set" pointcuts will be used.
  *                                    Other pointcut shorthands (e.g. "apply", "construct") will be ignored, if passed.
- * @return {Proxy} A new proxy object for the given target which supports lazy loading.
+ * @return {Proxy} A new proxy object for the given target which supports this builtin feature.
  */
 export default function lazyObject(
   target,

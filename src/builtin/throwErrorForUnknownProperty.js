@@ -49,6 +49,7 @@ import { prototypeChainProperties, typeToStr } from "js-utl";
  * @param {Object} [options.prototypeChainPropertiesOptions] Further options passed to the "prototypeChainProperties" function of js-utl (used internally).
  *                                                           See the "prototypeChainProperties" function of the js-utl package (https://github.com/tonix-tuft/js-utl)
  *                                                           for the available options.
+ * @return {Proxy} A new proxy object for the given target which supports this builtin feature.
  */
 export default function throwErrorForUnknownProperty(
   target,
