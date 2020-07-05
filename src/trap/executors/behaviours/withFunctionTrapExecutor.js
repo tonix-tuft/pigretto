@@ -163,6 +163,7 @@ export const withFunctionTrapExecutor = superclass => {
   };
   Object.defineProperty(NewClass, "name", {
     value: `WithFunctionTrapExecutor(${superclass.name})`,
+    configurable: true,
   });
   return NewClass;
 };
