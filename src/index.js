@@ -23,7 +23,6 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import "./polyfill/polyfill";
 import pigretto from "./pigretto";
 import applyRule from "./rules/applyRule";
 import constructRule from "./rules/constructRule";

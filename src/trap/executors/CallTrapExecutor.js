@@ -25,7 +25,6 @@
 
 import TrapExecutor from "./TrapExecutor";
 import { withFunctionTrapExecutor } from "./behaviours/withFunctionTrapExecutor";
-import { bindContextThisArg } from "../../polyfill/polyfill";
 import { isEmpty } from "js-utl";
 
 export default withFunctionTrapExecutor(
@@ -47,12 +46,10 @@ export default withFunctionTrapExecutor(
         const superExecute = trapArgs => {
           return super.execute(trapArgs, before, around, after);
         };
-        const wrapperFn = function(...args) {
+        const wrapperFn = function (...args) {
           let boundThis;
           if (this !== receiver) {
             boundThis = this;
-          } else if (propertyValue.isBound()) {
-            boundThis = propertyValue[bindContextThisArg];
           } else {
             boundThis = target;
           }
@@ -74,7 +71,7 @@ export default withFunctionTrapExecutor(
         target,
         property,
         receiver,
-        rule
+        rule,
       };
       advice.fn.apply(context, argumentsList);
     }
@@ -89,7 +86,7 @@ export default withFunctionTrapExecutor(
         target,
         property,
         receiver,
-        rule
+        rule,
       };
       return advice.fn(proceed).apply(context, argumentsList);
     }
@@ -104,7 +101,7 @@ export default withFunctionTrapExecutor(
         target,
         property,
         receiver,
-        rule
+        rule,
       };
       advice.fn(...argumentsList).apply(context, [returnValue]);
     }
@@ -125,7 +122,7 @@ export default withFunctionTrapExecutor(
         property,
         receiver,
         rule,
-        argumentsList
+        argumentsList,
       };
       return callback.apply(context, [returnValue]);
     }

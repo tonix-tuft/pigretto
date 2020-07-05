@@ -61,7 +61,5 @@
     "dist",
     "src"
   ],
-  "sideEffects": [
-    "./src/polyfill/polyfill.js"
-  ]
+  "sideEffects": false
 }
