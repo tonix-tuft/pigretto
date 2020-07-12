@@ -1,3 +1,4 @@
 **/private_local_*
 dist/**
 node_modules/
+index.html
