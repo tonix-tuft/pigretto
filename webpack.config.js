@@ -24,7 +24,7 @@ var config = {
     libraryTarget: "umd",
     globalObject: `(typeof self !== 'undefined' ? self : this)`,
     umdNamedDefine: true,
-    libraryExport: "default"
+    libraryExport: "default",
   },
   module: {
     rules: [
@@ -42,24 +42,24 @@ var config = {
                 [
                   "@babel/plugin-transform-runtime",
                   {
-                    regenerator: true
-                  }
-                ]
-              ]
-            }
-          ]
-        }
+                    regenerator: true,
+                  },
+                ],
+              ],
+            },
+          ],
+        },
       },
       {
         test: /(\.jsx|\.js)$/,
         loader: "eslint-loader",
-        exclude: /node_modules/
-      }
-    ]
+        exclude: /node_modules/,
+      },
+    ],
   },
   resolve: {
-    extensions: [".js"]
-  }
+    extensions: [".js"],
+  },
 };
 
 if (env === "build") {
@@ -70,11 +70,11 @@ if (env === "build") {
         parallel: true,
         terserOptions: {
           output: {
-            comments: false
-          }
-        }
-      })
-    ]
+            comments: false,
+          },
+        },
+      }),
+    ],
   };
   config.mode = "production";
   config.devtool = false;
