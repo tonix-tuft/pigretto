@@ -37,6 +37,13 @@ const queueTupleProp = Symbol("queueTupleProp");
 const dataProp = Symbol("dataProp");
 
 /**
+ * @type {Function}
+ */
+const dummyNoOp = () => {
+  // Just a dummy no-op function. Required when the Proxy API is polyfilled with proxy-polyfill (https://github.com/GoogleChrome/proxy-polyfill/)
+};
+
+/**
  * Builtin function using pigretto's API to create a POJO promiser,
  * i.e. a proxy object with syntactic sugar which lets creating a queue of properties to resolve
  * and resolves to an object with those same properties and their respective resolved values.
@@ -55,6 +62,14 @@ export default function POJOPromiser(
   obj,
   { mutateTargetOnSettledPromiseQueue = false } = {}
 ) {
+  const originalTarget = obj;
+
+  // This is needed because the Proxy API may be polyfilled with proxy-polyfill (https://github.com/GoogleChrome/proxy-polyfill/).
+  // Cloning "obj" allows setting properties on the target clone.
+  const target = {
+    ...obj,
+  };
+
   const that = {
     [queueTupleProp]: void 0,
     [dataProp]: {},
@@ -74,7 +89,8 @@ export default function POJOPromiser(
             that[queueTupleProp] = void 0; // Clear queue.
             resolve(obj); // Resolve promise queue.
             if (obj && mutateTargetOnSettledPromiseQueue) {
-              Object.assign(target, obj); // Assign resolved values to the proxy target, so that promise won't have to be called again.
+              // Assign resolved values to the original target, so that properties which value is a promise will be replaced with the resolved value.
+              Object.assign(originalTarget, obj);
             }
           });
         });
@@ -119,9 +135,12 @@ export default function POJOPromiser(
 
       that[queueTupleProp] = [prop, promise]; // Save the promise and the property in the queue.
       // All alternations ensure that no matter what the value, a promise which must be resolved is always given.
-      return pigretto(target, rules);
+      target.then = dummyNoOp;
+      const pigrettarget = pigretto(target, rules);
+      return pigrettarget;
     }),
   };
-  const pigrettarget = pigretto(obj, rules);
+  target.then = dummyNoOp;
+  const pigrettarget = pigretto(target, rules);
   return pigrettarget;
 }

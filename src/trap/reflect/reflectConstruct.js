@@ -24,5 +24,7 @@
  */
 
 export default function reflectConstruct(target, argumentsList, newTarget) {
-  return Reflect.construct(target, argumentsList, newTarget);
+  return newTarget
+    ? Reflect.construct(target, argumentsList, newTarget)
+    : new target(...argumentsList);
 }
