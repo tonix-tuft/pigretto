@@ -19,7 +19,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "WEBPACK_ENV=watch webpack --progress --colors --watch",
-    "clear-build": "find ./dist ! -name '.gitignore' -exec rm -Rf {} +",
+    "clear-build": "rm -Rf ./dist && mkdir ./dist",
     "dev-build": "WEBPACK_ENV=dev webpack --progress --colors",
     "build": "WEBPACK_ENV=build webpack",
     "dev-build-ie11": "WEBPACK_ENV=dev webpack --progress --colors --config webpack.config.ie11.js",
