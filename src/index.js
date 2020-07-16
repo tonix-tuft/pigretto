@@ -34,6 +34,7 @@ import construct from "./pointcuts/shorthands/construct";
 import lazyObject from "./builtin/lazyObject";
 import throwErrorForUnknownProperty from "./builtin/throwErrorForUnknownProperty";
 import POJOPromiser from "./builtin/POJOPromiser";
+import arrayWithNegativeIndices from "./builtin/arrayWithNegativeIndices";
 
 /*
  * Mapping the API properties to the pigretto function.
@@ -54,8 +55,14 @@ pigretto.builtin = {};
   ["lazyObject", lazyObject],
   ["throwErrorForUnknownProperty", throwErrorForUnknownProperty],
   ["POJOPromiser", POJOPromiser],
+  ["arrayWithNegativeIndices", arrayWithNegativeIndices],
 ].map(([prop, val]) => (pigretto.builtin[prop] = val));
 
 export default pigretto;
 export { call, get, set, applyRule, apply, constructRule, construct };
-export { lazyObject, throwErrorForUnknownProperty, POJOPromiser };
+export {
+  lazyObject,
+  throwErrorForUnknownProperty,
+  POJOPromiser,
+  arrayWithNegativeIndices,
+};
