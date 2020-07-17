@@ -37,7 +37,7 @@ export default withFunctionTrapExecutor(
       const context = {
         target,
         newTarget,
-        rule
+        rule,
       };
       advice.fn.apply(context, argumentsList);
     }
@@ -51,9 +51,9 @@ export default withFunctionTrapExecutor(
       const context = {
         target,
         newTarget,
-        rule
+        rule,
       };
-      return advice.fn(proceed).apply(context, argumentsList);
+      return advice.fn.call(context, proceed).apply(context, argumentsList);
     }
 
     executeAfterAdvice(
@@ -65,9 +65,9 @@ export default withFunctionTrapExecutor(
       const context = {
         target,
         newTarget,
-        rule
+        rule,
       };
-      advice.fn(...argumentsList).apply(context, [instance]);
+      advice.fn.call(context, ...argumentsList).apply(context, [instance]);
     }
 
     performUnderlyingOperation([target, argumentsList, newTarget]) {
@@ -85,7 +85,7 @@ export default withFunctionTrapExecutor(
         target,
         newTarget,
         rule,
-        argumentsList
+        argumentsList,
       };
       return callback.apply(context, [instance]);
     }

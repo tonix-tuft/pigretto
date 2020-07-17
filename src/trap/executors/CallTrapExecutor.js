@@ -88,7 +88,7 @@ export default withFunctionTrapExecutor(
         receiver,
         rule,
       };
-      return advice.fn(proceed).apply(context, argumentsList);
+      return advice.fn.call(context, proceed).apply(context, argumentsList);
     }
 
     executeAfterAdvice(
@@ -103,7 +103,7 @@ export default withFunctionTrapExecutor(
         receiver,
         rule,
       };
-      advice.fn(...argumentsList).apply(context, [returnValue]);
+      advice.fn.call(context, ...argumentsList).apply(context, [returnValue]);
     }
 
     performUnderlyingOperation([, , , originalFn, argumentsList]) {

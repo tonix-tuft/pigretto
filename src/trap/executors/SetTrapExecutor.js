@@ -61,7 +61,7 @@ export default class SetTrapExecutor extends TrapExecutor {
       property,
       value,
       receiver,
-      rule
+      rule,
     };
     advice.fn.apply(context, [previousPropertyValue]);
   }
@@ -80,9 +80,11 @@ export default class SetTrapExecutor extends TrapExecutor {
       property,
       value,
       receiver,
-      rule
+      rule,
     };
-    return advice.fn(proceed).apply(context, [previousPropertyValue]);
+    return advice.fn
+      .call(context, proceed)
+      .apply(context, [previousPropertyValue]);
   }
 
   executeAfterAdvice(
@@ -101,9 +103,11 @@ export default class SetTrapExecutor extends TrapExecutor {
       value,
       receiver,
       rule,
-      updateWasSuccessful
+      updateWasSuccessful,
     };
-    advice.fn(previousPropertyValue).apply(context, [newPropertyValue]);
+    advice.fn
+      .call(context, previousPropertyValue)
+      .apply(context, [newPropertyValue]);
   }
 
   performUnderlyingOperation([target, property, value, receiver]) {
@@ -124,7 +128,7 @@ export default class SetTrapExecutor extends TrapExecutor {
       property,
       value,
       receiver,
-      rule
+      rule,
     };
     const returnValue = callback.apply(context, [newPropertyValue]);
     return returnValue;
@@ -136,7 +140,7 @@ export default class SetTrapExecutor extends TrapExecutor {
         target,
         property,
         returnValue,
-        receiver
+        receiver,
       ]);
     }
     return this.updateWasSuccessfulMap[this.execContextID];
