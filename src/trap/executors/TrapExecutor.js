@@ -55,7 +55,7 @@ export default class TrapExecutor {
       proceeds: [],
       hasAtLeastOneAroundAdvice: false,
       hasAtLeastOneBeforeAdvice: false,
-      returnValue: noReturnValue
+      returnValue: noReturnValue,
     };
     this.execContextStack.push(context);
     this.execContextID++;
@@ -190,7 +190,7 @@ export default class TrapExecutor {
       this.execContextStack[this.execContextID].proceeds.push({
         params: finalParams,
         fn: finalFn,
-        rule
+        rule,
       });
     };
     const returnValue = this.executeAroundAdvice(
@@ -233,9 +233,14 @@ export default class TrapExecutor {
       );
     }
     let returnValue = this.performUnderlyingOperation(trapArgs);
-    for (const { fn: callback, rule } of this.execContextStack[
-      this.execContextID
-    ].proceeds) {
+    for (
+      let i = this.execContextStack[this.execContextID].proceeds.length - 1;
+      i >= 0;
+      i--
+    ) {
+      const { fn: callback, rule } = this.execContextStack[
+        this.execContextID
+      ].proceeds[i];
       if (typeof callback === "function") {
         returnValue = this.executeProceedCallback(
           trapArgs,
