@@ -23,13 +23,12 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { isArray, isUndefined } from "js-utl";
+import { isArray } from "js-utl";
 import { throwErrorIfDoesNotImplement } from "./common/throwErrorIfDoesNotImplement";
 
 export const withFunctionTrapExecutor = superclass => {
   const NewClass = class extends superclass {
     executedAtLeastOnce = false;
-    lastProceedWithParamsIndexMap = {};
     finalTrapArgsMap = {};
 
     startExecutionContext(trapArgs) {
@@ -48,8 +47,6 @@ export const withFunctionTrapExecutor = superclass => {
           `pigretto - ${superclass.name} trap executor does not have "execContextID" property.`
         );
       }
-      this.lastProceedWithParamsIndexMap[this.execContextID] = -1;
-      this.finalTrapArgsMap[this.execContextID] = void 0;
     }
 
     endExecutionContext(trapArgs) {
@@ -60,7 +57,6 @@ export const withFunctionTrapExecutor = superclass => {
           superclass
         );
       super.endExecutionContext(trapArgs);
-      this.finalTrapArgsMap[this.execContextID] = void 0;
       this.executedAtLeastOnce = true;
     }
 
@@ -80,34 +76,10 @@ export const withFunctionTrapExecutor = superclass => {
           `pigretto - ${superclass.name} trap executor does not have "execContextStack" property.`
         );
       }
-      const proceedsL = this.execContextStack[this.execContextID].proceeds
-        .length;
-      if (proceedsL) {
-        let hasParamsOverride = false;
-        for (
-          let i = proceedsL - 1;
-          i > this.lastProceedWithParamsIndexMap[this.execContextID];
-          i--
-        ) {
-          const { params } = this.execContextStack[this.execContextID].proceeds[
-            i
-          ];
-          if (isArray(params)) {
-            hasParamsOverride = true;
-            this.lastProceedWithParamsIndexMap[this.execContextID] = i;
-            trapArgs = [...trapArgs];
-            trapArgs[argumentsListIndex] = params;
-            this.finalTrapArgsMap[this.execContextID] = trapArgs;
-            break;
-          }
-        }
-        if (!hasParamsOverride) {
-          this.lastProceedWithParamsIndexMap[this.execContextID] =
-            proceedsL - 1;
-        }
-      }
-      if (!isUndefined(this.finalTrapArgsMap[this.execContextID])) {
-        return this.finalTrapArgsMap[this.execContextID];
+      const params = this.execContextStack[this.execContextID].finalParams;
+      if (isArray(this.execContextStack[this.execContextID].finalParams)) {
+        trapArgs = [...trapArgs];
+        trapArgs[argumentsListIndex] = params;
       }
       return trapArgs;
     }

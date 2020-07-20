@@ -56,6 +56,7 @@ export default class TrapExecutor {
       hasAtLeastOneAroundAdvice: false,
       hasAtLeastOneBeforeAdvice: false,
       returnValue: noReturnValue,
+      finalParams: void 0,
     };
     this.execContextStack.push(context);
     this.execContextID++;
@@ -188,10 +189,11 @@ export default class TrapExecutor {
         finalFn = params;
       }
       this.execContextStack[this.execContextID].proceeds.push({
-        params: finalParams,
         fn: finalFn,
         rule,
       });
+      this.execContextStack[this.execContextID].finalParams =
+        finalParams || this.execContextStack[this.execContextID].finalParams;
     };
     const returnValue = this.executeAroundAdvice(
       trapArgs,
