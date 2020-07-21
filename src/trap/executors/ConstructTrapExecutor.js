@@ -62,6 +62,7 @@ export default withFunctionTrapExecutor(
       rule,
       instance
     ) {
+      // TODO: argumentsList with transversal context
       const context = {
         target,
         newTarget,
@@ -81,6 +82,7 @@ export default withFunctionTrapExecutor(
       instance,
       callback
     ) {
+      // TODO: argumentsList with transversal context
       const context = {
         target,
         newTarget,

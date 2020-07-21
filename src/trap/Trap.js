@@ -272,6 +272,7 @@ export default class Trap {
     // Function call advices.
     this.lazilyDistributeAdvices("apply");
     const { before, around, after } = this.distributedAdvices.apply;
+    // TODO: transversal context
     return this.trapExecutors.apply.execute(
       [target, thisArg, argumentsList],
       before,
@@ -284,6 +285,7 @@ export default class Trap {
     // Object construction via the "new" keyword advices.
     this.lazilyDistributeAdvices("construct");
     const { before, around, after } = this.distributedAdvices.construct;
+    // TODO: transversal context
     return this.trapExecutors.construct.execute(
       [target, argumentsList, newTarget],
       before,

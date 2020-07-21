@@ -53,9 +53,11 @@ export default withFunctionTrapExecutor(
           } else {
             boundThis = target;
           }
-          propertyValue = propertyValue.bind(boundThis);
-          const trapArgs = [target, property, receiver, propertyValue, args];
-          return superExecute(trapArgs);
+          const originalFn = propertyValue.bind(boundThis);
+          const trapArgs = [target, property, receiver, originalFn, args];
+          // TODO: transversal context
+          const returnValue = superExecute(trapArgs);
+          return returnValue;
         };
         return wrapperFn;
       }
@@ -97,6 +99,7 @@ export default withFunctionTrapExecutor(
       rule,
       returnValue
     ) {
+      // TODO: argumentsList with transversal context
       const context = {
         target,
         property,
@@ -117,6 +120,7 @@ export default withFunctionTrapExecutor(
       returnValue,
       callback
     ) {
+      // TODO: argumentsList with transversal context
       const context = {
         target,
         property,

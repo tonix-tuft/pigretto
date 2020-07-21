@@ -40,6 +40,7 @@ export default class TrapExecutor {
     this.startExecutionContext(trapArgs);
     this.beforePhase(trapArgs, before);
     this.aroundPhase(trapArgs, around);
+    // TODO: transversal context
     const returnValue = this.proceedPhase(trapArgs);
     this.afterPhase(trapArgs, after, returnValue);
     this.endExecutionContext(trapArgs);
@@ -226,15 +227,17 @@ export default class TrapExecutor {
    * @private
    */
   proceedPhase(trapArgs) {
+    let returnValue;
     if (
       this.execContextStack[this.execContextID].returnValue !== noReturnValue
     ) {
-      return this.return(
+      returnValue = this.return(
         trapArgs,
         this.execContextStack[this.execContextID].returnValue
       );
+    } else {
+      returnValue = this.performUnderlyingOperation(trapArgs);
     }
-    let returnValue = this.performUnderlyingOperation(trapArgs);
     for (
       let i = this.execContextStack[this.execContextID].proceeds.length - 1;
       i >= 0;
@@ -252,6 +255,7 @@ export default class TrapExecutor {
         );
       }
     }
+    // TODO: transversal context
     return this.return(trapArgs, returnValue);
   }
 
