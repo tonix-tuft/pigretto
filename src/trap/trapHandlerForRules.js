@@ -26,6 +26,7 @@
 import rulesGenerator from "../rules/rulesGenerator";
 import parseRule from "../rules/parser/parseRule";
 import Trap from "./Trap";
+import { isPigrettoProxy } from "../props";
 
 /**
  * Generates a new trap handler object for the given rules.
@@ -47,8 +48,11 @@ export default function trapHandlerForRules(proxyRules) {
       ? {
           // Trap for property access (getting) and method call.
           get(target, property, receiver) {
+            if (property === isPigrettoProxy) {
+              return true;
+            }
             return trap.get(target, property, receiver);
-          }
+          },
         }
       : {}),
     ...(trap.hasSets()
@@ -62,7 +66,7 @@ export default function trapHandlerForRules(proxyRules) {
               receiver
             );
             return updateWasSuccessful;
-          }
+          },
         }
       : {}),
     ...(trap.hasApplies()
@@ -70,7 +74,7 @@ export default function trapHandlerForRules(proxyRules) {
           // Trap for function call.
           apply(target, thisArg, argumentsList) {
             return trap.apply(target, thisArg, argumentsList);
-          }
+          },
         }
       : {}),
     ...(trap.hasConstructs()
@@ -78,8 +82,8 @@ export default function trapHandlerForRules(proxyRules) {
           // Trap for object construction with the "new" operator.
           construct(target, argumentsList, newTarget) {
             return trap.construct(target, argumentsList, newTarget);
-          }
+          },
         }
-      : {})
+      : {}),
   };
 }

@@ -39,7 +39,10 @@ export default class SetTrapExecutor extends TrapExecutor {
         this.execContextID
       )
     ) {
-      const previousPropertyValue = reflectGet(target, property, receiver);
+      const previousPropertyValue = this.notWithinExecContext(() => {
+        const previousPropertyValue = reflectGet(target, property, receiver);
+        return previousPropertyValue;
+      }, target);
       this.previousPropertyValueMap[this.execContextID] = previousPropertyValue;
       this.returnNewPropertyValueMap[this.execContextID] = void 0;
       this.updateWasSuccessfulMap[this.execContextID] = false;
@@ -63,7 +66,9 @@ export default class SetTrapExecutor extends TrapExecutor {
       receiver,
       rule,
     };
-    advice.fn.apply(context, [previousPropertyValue]);
+    this.notWithinExecContext(() => {
+      advice.fn.apply(context, [previousPropertyValue]);
+    });
   }
 
   executeAroundAdvice(
@@ -82,9 +87,13 @@ export default class SetTrapExecutor extends TrapExecutor {
       receiver,
       rule,
     };
-    return advice.fn
-      .call(context, proceed)
-      .apply(context, [previousPropertyValue]);
+    const returnValue = this.notWithinExecContext(() => {
+      const returnValue = advice.fn
+        .call(context, proceed)
+        .apply(context, [previousPropertyValue]);
+      return returnValue;
+    });
+    return returnValue;
   }
 
   executeAfterAdvice(
@@ -105,13 +114,18 @@ export default class SetTrapExecutor extends TrapExecutor {
       rule,
       updateWasSuccessful,
     };
-    advice.fn
-      .call(context, previousPropertyValue)
-      .apply(context, [newPropertyValue]);
+    this.notWithinExecContext(() => {
+      advice.fn
+        .call(context, previousPropertyValue)
+        .apply(context, [newPropertyValue]);
+    });
   }
 
   performUnderlyingOperation([target, property, value, receiver]) {
-    const updateWasSuccessful = reflectSet(target, property, value, receiver);
+    const updateWasSuccessful = this.notWithinExecContext(() => {
+      const updateWasSuccessful = reflectSet(target, property, value, receiver);
+      return updateWasSuccessful;
+    }, target);
     this.updateWasSuccessfulMap[this.execContextID] = updateWasSuccessful;
     this.returnNewPropertyValueMap[this.execContextID] = value;
     return value;
@@ -130,7 +144,9 @@ export default class SetTrapExecutor extends TrapExecutor {
       receiver,
       rule,
     };
-    const returnValue = callback.apply(context, [newPropertyValue]);
+    const returnValue = this.notWithinExecContext(() => {
+      return callback.apply(context, [newPropertyValue]);
+    });
     return returnValue;
   }
 

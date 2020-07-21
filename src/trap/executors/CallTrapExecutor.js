@@ -55,7 +55,6 @@ export default withFunctionTrapExecutor(
           }
           const originalFn = propertyValue.bind(boundThis);
           const trapArgs = [target, property, receiver, originalFn, args];
-          // TODO: transversal context
           const returnValue = superExecute(trapArgs);
           return returnValue;
         };
@@ -75,7 +74,9 @@ export default withFunctionTrapExecutor(
         receiver,
         rule,
       };
-      advice.fn.apply(context, argumentsList);
+      this.notWithinExecContext(() => {
+        advice.fn.apply(context, argumentsList);
+      });
     }
 
     executeAroundAdvice(
@@ -90,7 +91,13 @@ export default withFunctionTrapExecutor(
         receiver,
         rule,
       };
-      return advice.fn.call(context, proceed).apply(context, argumentsList);
+      const returnValue = this.notWithinExecContext(() => {
+        const returnValue = advice.fn
+          .call(context, proceed)
+          .apply(context, argumentsList);
+        return returnValue;
+      });
+      return returnValue;
     }
 
     executeAfterAdvice(
@@ -99,18 +106,26 @@ export default withFunctionTrapExecutor(
       rule,
       returnValue
     ) {
-      // TODO: argumentsList with transversal context
       const context = {
         target,
         property,
         receiver,
         rule,
+        effectiveArgumentsList: TrapExecutor.getTransversalExecContextStackData(
+          "finalParams",
+          argumentsList
+        ),
       };
-      advice.fn.call(context, ...argumentsList).apply(context, [returnValue]);
+      this.notWithinExecContext(() => {
+        advice.fn.call(context, ...argumentsList).apply(context, [returnValue]);
+      });
     }
 
-    performUnderlyingOperation([, , , originalFn, argumentsList]) {
-      const returnValue = originalFn(...argumentsList);
+    performUnderlyingOperation([target, , , originalFn, argumentsList]) {
+      const returnValue = this.notWithinExecContext(() => {
+        const returnValue = originalFn(...argumentsList);
+        return returnValue;
+      }, target);
       return returnValue;
     }
 
@@ -120,15 +135,20 @@ export default withFunctionTrapExecutor(
       returnValue,
       callback
     ) {
-      // TODO: argumentsList with transversal context
       const context = {
         target,
         property,
         receiver,
         rule,
         argumentsList,
+        effectiveArgumentsList: TrapExecutor.getTransversalExecContextStackData(
+          "finalParams",
+          argumentsList
+        ),
       };
-      return callback.apply(context, [returnValue]);
+      return this.notWithinExecContext(() => {
+        return callback.apply(context, [returnValue]);
+      });
     }
   }
 );

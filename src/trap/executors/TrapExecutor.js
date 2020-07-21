@@ -24,6 +24,7 @@
  */
 
 import { isArray } from "js-utl";
+import { isPigrettoProxy } from "../../props";
 
 /**
  * @type {Symbol}
@@ -31,20 +32,101 @@ import { isArray } from "js-utl";
 const noReturnValue = Symbol("noReturnValue");
 
 export default class TrapExecutor {
+  static isWithinExecContext = false;
+  static transversalExecContextStack = [];
+  static transversalExecContextID = -1;
+  static newTransversalExecContextMap = {};
+
   execContextStack = [];
   execContextID = -1;
 
+  /**
+   * @static
+   * @private
+   */
+  static newTransversalExecutionContext() {
+    const context = {
+      finalParams: void 0,
+    };
+    TrapExecutor.transversalExecContextStack.push(context);
+    TrapExecutor.transversalExecContextID++;
+    TrapExecutor.newTransversalExecContextMap[
+      TrapExecutor.transversalExecContextID
+    ] = true;
+  }
+
+  /**
+   * @static
+   * @private
+   */
+  static cleanUpTransversalExecutionContext() {
+    TrapExecutor.transversalExecContextStack.pop();
+    const currentTransversalExecContextID =
+      TrapExecutor.transversalExecContextID;
+    TrapExecutor.transversalExecContextID--;
+    if (
+      TrapExecutor.newTransversalExecContextMap[currentTransversalExecContextID]
+    ) {
+      delete TrapExecutor.newTransversalExecContextMap[
+        currentTransversalExecContextID
+      ];
+      TrapExecutor.isWithinExecContext = false;
+    }
+  }
+
+  static getTransversalExecContextStackData(key, defaultValue = void 0) {
+    if (
+      TrapExecutor.transversalExecContextStack[
+        TrapExecutor.transversalExecContextID
+      ]
+    ) {
+      return TrapExecutor.transversalExecContextStack[
+        TrapExecutor.transversalExecContextID
+      ][key];
+    } else {
+      return defaultValue;
+    }
+  }
+
   execute(trapArgs, before, around, after) {
-    this.newExecutionContext();
-    this.setUpExecutionContext(before, around);
-    this.startExecutionContext(trapArgs);
-    this.beforePhase(trapArgs, before);
-    this.aroundPhase(trapArgs, around);
-    // TODO: transversal context
-    const returnValue = this.proceedPhase(trapArgs);
-    this.afterPhase(trapArgs, after, returnValue);
-    this.endExecutionContext(trapArgs);
-    this.cleanUpExecutionContext();
+    const returnValue = this.withinExecContext(() => {
+      this.newExecutionContext();
+      this.startExecutionContext(trapArgs);
+      this.beforePhase(trapArgs, before);
+      this.aroundPhase(trapArgs, around);
+      const returnValue = this.proceedPhase(trapArgs);
+      this.afterPhase(trapArgs, after, returnValue);
+      this.endExecutionContext(trapArgs);
+      this.cleanUpExecutionContext();
+      return returnValue;
+    });
+    return returnValue;
+  }
+
+  /**
+   * @private
+   */
+  withinExecContext(callback) {
+    let isNewTransversalExecutionContext = false;
+    if (!TrapExecutor.isWithinExecContext) {
+      isNewTransversalExecutionContext = true;
+      TrapExecutor.isWithinExecContext = true;
+      TrapExecutor.newTransversalExecutionContext();
+    }
+    const returnValue = callback();
+    if (isNewTransversalExecutionContext) {
+      TrapExecutor.cleanUpTransversalExecutionContext();
+    }
+    return returnValue;
+  }
+
+  notWithinExecContext(callback, target = void 0) {
+    const current = TrapExecutor.isWithinExecContext;
+    if (!target || !target[isPigrettoProxy]) {
+      TrapExecutor.isWithinExecContext = false;
+    }
+    const returnValue = callback();
+    TrapExecutor.isWithinExecContext = current;
     return returnValue;
   }
 
@@ -54,25 +136,11 @@ export default class TrapExecutor {
   newExecutionContext() {
     const context = {
       proceeds: [],
-      hasAtLeastOneAroundAdvice: false,
-      hasAtLeastOneBeforeAdvice: false,
       returnValue: noReturnValue,
       finalParams: void 0,
     };
     this.execContextStack.push(context);
     this.execContextID++;
-  }
-
-  /**
-   * @private
-   */
-  setUpExecutionContext(before, around) {
-    this.execContextStack[
-      this.execContextID
-    ].hasAtLeastOneBeforeAdvice = !!before.length;
-    this.execContextStack[
-      this.execContextID
-    ].hasAtLeastOneAroundAdvice = !!around.length;
   }
 
   /* eslint-disable no-unused-vars, @typescript-eslint/no-empty-function */
@@ -195,6 +263,9 @@ export default class TrapExecutor {
       });
       this.execContextStack[this.execContextID].finalParams =
         finalParams || this.execContextStack[this.execContextID].finalParams;
+      TrapExecutor.transversalExecContextStack[
+        TrapExecutor.transversalExecContextID
+      ].finalParams = this.execContextStack[this.execContextID].finalParams;
     };
     const returnValue = this.executeAroundAdvice(
       trapArgs,
@@ -255,7 +326,6 @@ export default class TrapExecutor {
         );
       }
     }
-    // TODO: transversal context
     return this.return(trapArgs, returnValue);
   }
 

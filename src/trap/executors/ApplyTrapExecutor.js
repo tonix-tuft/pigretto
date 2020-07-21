@@ -39,7 +39,9 @@ export default withFunctionTrapExecutor(
         thisArg,
         rule,
       };
-      advice.fn.apply(context, argumentsList);
+      this.notWithinExecContext(() => {
+        advice.fn.apply(context, argumentsList);
+      });
     }
 
     executeAroundAdvice(
@@ -53,7 +55,13 @@ export default withFunctionTrapExecutor(
         thisArg,
         rule,
       };
-      return advice.fn.call(context, proceed).apply(context, argumentsList);
+      const returnValue = this.notWithinExecContext(() => {
+        const returnValue = advice.fn
+          .call(context, proceed)
+          .apply(context, argumentsList);
+        return returnValue;
+      });
+      return returnValue;
     }
 
     executeAfterAdvice(
@@ -62,17 +70,25 @@ export default withFunctionTrapExecutor(
       rule,
       returnValue
     ) {
-      // TODO: argumentsList with transversal context
       const context = {
         target,
         thisArg,
         rule,
+        effectiveArgumentsList: TrapExecutor.getTransversalExecContextStackData(
+          "finalParams",
+          argumentsList
+        ),
       };
-      advice.fn.call(context, ...argumentsList).apply(context, [returnValue]);
+      this.notWithinExecContext(() => {
+        advice.fn.call(context, ...argumentsList).apply(context, [returnValue]);
+      });
     }
 
     performUnderlyingOperation([target, thisArg, argumentsList]) {
-      const returnValue = reflectApply(target, thisArg, argumentsList);
+      const returnValue = this.notWithinExecContext(() => {
+        const returnValue = reflectApply(target, thisArg, argumentsList);
+        return returnValue;
+      }, target);
       return returnValue;
     }
 
@@ -82,14 +98,19 @@ export default withFunctionTrapExecutor(
       returnValue,
       callback
     ) {
-      // TODO: argumentsList with transversal context
       const context = {
         target,
         thisArg,
         rule,
         argumentsList,
+        effectiveArgumentsList: TrapExecutor.getTransversalExecContextStackData(
+          "finalParams",
+          argumentsList
+        ),
       };
-      return callback.apply(context, [returnValue]);
+      return this.notWithinExecContext(() => {
+        return callback.apply(context, [returnValue]);
+      });
     }
   }
 );

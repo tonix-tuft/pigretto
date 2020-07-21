@@ -58,7 +58,7 @@ export default class Trap {
     apply: [],
 
     // Does not require matching (construct trap). Requires distribution.
-    construct: []
+    construct: [],
   };
 
   distributedAdvices = {
@@ -66,13 +66,13 @@ export default class Trap {
     get: { before: void 0, around: void 0, after: void 0 },
     set: { before: void 0, around: void 0, after: void 0 },
     apply: { before: void 0, around: void 0, after: void 0 },
-    construct: { before: void 0, around: void 0, after: void 0 }
+    construct: { before: void 0, around: void 0, after: void 0 },
   };
 
   matchedDistributedAdvices = {
     call: new Map(),
     get: new Map(),
-    set: new Map()
+    set: new Map(),
   };
 
   trapExecutors = {
@@ -80,7 +80,7 @@ export default class Trap {
     get: new GetTrapExecutor(),
     set: new SetTrapExecutor(),
     apply: new ApplyTrapExecutor(),
-    construct: new ConstructTrapExecutor()
+    construct: new ConstructTrapExecutor(),
   };
 
   /**
@@ -97,7 +97,7 @@ export default class Trap {
     advices.map(advice =>
       this.advices[pointcutType].push({
         rule,
-        advice
+        advice,
       })
     );
   }
@@ -114,7 +114,7 @@ export default class Trap {
         const subKey = declarativeFactory([
           [() => advice instanceof BeforeAdvice, "before"],
           [() => advice instanceof AroundAdvice, "around"],
-          "after"
+          "after",
         ]);
         this.distributedAdvices[pointcutType][subKey].push({ rule, advice });
       }
@@ -133,7 +133,7 @@ export default class Trap {
       const node = {
         before: [],
         around: [],
-        after: []
+        after: [],
       };
       map.set(property, node);
       const beforeAdvices = this.distributedAdvices[pointcutType].before;
@@ -180,7 +180,7 @@ export default class Trap {
           }
           return false;
         },
-        "apply"
+        "apply",
       ],
       [
         () => {
@@ -194,8 +194,8 @@ export default class Trap {
           }
           return false;
         },
-        "construct"
-      ]
+        "construct",
+      ],
     ]);
     if (pointcutType) {
       const { advices } = pointcut;
@@ -230,7 +230,7 @@ export default class Trap {
     const {
       before: getBefore,
       around: getAround,
-      after: getAfter
+      after: getAfter,
     } = this.matchedDistributedAdvices.get.get(property);
     const propertyValue = this.trapExecutors.get.execute(
       [target, property, receiver],
@@ -242,7 +242,7 @@ export default class Trap {
     const {
       before: callBefore,
       around: callAround,
-      after: callAfter
+      after: callAfter,
     } = this.matchedDistributedAdvices.call.get(property);
     const returnValue = this.trapExecutors.call.execute(
       [target, property, receiver, propertyValue],
@@ -272,7 +272,6 @@ export default class Trap {
     // Function call advices.
     this.lazilyDistributeAdvices("apply");
     const { before, around, after } = this.distributedAdvices.apply;
-    // TODO: transversal context
     return this.trapExecutors.apply.execute(
       [target, thisArg, argumentsList],
       before,
@@ -285,7 +284,6 @@ export default class Trap {
     // Object construction via the "new" keyword advices.
     this.lazilyDistributeAdvices("construct");
     const { before, around, after } = this.distributedAdvices.construct;
-    // TODO: transversal context
     return this.trapExecutors.construct.execute(
       [target, argumentsList, newTarget],
       before,

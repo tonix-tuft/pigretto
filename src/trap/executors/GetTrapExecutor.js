@@ -32,9 +32,11 @@ export default class GetTrapExecutor extends TrapExecutor {
       target,
       property,
       receiver,
-      rule
+      rule,
     };
-    advice.fn.apply(context);
+    this.notWithinExecContext(() => {
+      advice.fn.apply(context);
+    });
   }
 
   executeAroundAdvice([target, property, receiver], advice, rule, proceed) {
@@ -42,9 +44,13 @@ export default class GetTrapExecutor extends TrapExecutor {
       target,
       property,
       receiver,
-      rule
+      rule,
     };
-    return advice.fn.apply(context, [proceed]);
+    const returnValue = this.notWithinExecContext(() => {
+      const returnValue = advice.fn.apply(context, [proceed]);
+      return returnValue;
+    });
+    return returnValue;
   }
 
   executeAfterAdvice(
@@ -57,13 +63,18 @@ export default class GetTrapExecutor extends TrapExecutor {
       target,
       property,
       receiver,
-      rule
+      rule,
     };
-    advice.fn.apply(context, [propertyValue]);
+    this.notWithinExecContext(() => {
+      advice.fn.apply(context, [propertyValue]);
+    });
   }
 
   performUnderlyingOperation([target, property, receiver]) {
-    const propertyValue = reflectGet(target, property, receiver);
+    const propertyValue = this.notWithinExecContext(() => {
+      const propertyValue = reflectGet(target, property, receiver);
+      return propertyValue;
+    }, target);
     return propertyValue;
   }
 
@@ -77,8 +88,10 @@ export default class GetTrapExecutor extends TrapExecutor {
       target,
       property,
       receiver,
-      rule
+      rule,
     };
-    return callback.apply(context, [propertyValue]);
+    return this.notWithinExecContext(() => {
+      return callback.apply(context, [propertyValue]);
+    });
   }
 }
