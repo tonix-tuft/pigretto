@@ -26,6 +26,7 @@
 import TrapExecutor from "./TrapExecutor";
 import reflectSet from "../reflect/reflectSet";
 import reflectGet from "../reflect/reflectGet";
+import { isArray } from "js-utl";
 
 export default class SetTrapExecutor extends TrapExecutor {
   previousPropertyValueMap = {};
@@ -71,12 +72,22 @@ export default class SetTrapExecutor extends TrapExecutor {
     });
   }
 
+  getFinalValue(value) {
+    const params = this.execContextStack[this.execContextID].finalParams;
+    if (isArray(params)) {
+      const [finalValue] = params;
+      value = finalValue;
+    }
+    return value;
+  }
+
   executeAroundAdvice(
     [target, property, value, receiver],
     advice,
     rule,
     proceed
   ) {
+    value = this.getFinalValue(value);
     const previousPropertyValue = this.previousPropertyValueMap[
       this.execContextID
     ];
@@ -102,6 +113,7 @@ export default class SetTrapExecutor extends TrapExecutor {
     rule,
     updateWasSuccessful
   ) {
+    value = this.getFinalValue(value);
     const previousPropertyValue = this.previousPropertyValueMap[
       this.execContextID
     ];
@@ -122,6 +134,7 @@ export default class SetTrapExecutor extends TrapExecutor {
   }
 
   performUnderlyingOperation([target, property, value, receiver]) {
+    value = this.getFinalValue(value);
     const updateWasSuccessful = this.notWithinExecContext(() => {
       const updateWasSuccessful = reflectSet(target, property, value, receiver);
       return updateWasSuccessful;
@@ -137,6 +150,7 @@ export default class SetTrapExecutor extends TrapExecutor {
     newPropertyValue,
     callback
   ) {
+    value = this.getFinalValue(value);
     const context = {
       target,
       property,
