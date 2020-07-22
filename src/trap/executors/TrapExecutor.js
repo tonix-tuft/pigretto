@@ -165,7 +165,7 @@ export default class TrapExecutor {
   unsupportedMultipleProceeds(advice, rule) {
     // eslint-disable-next-line no-console
     console.error(
-      "pigretto - Multiple proceeds for the same advice are not supported, subsequent proceed has been ignored.",
+      "pigretto - Multiple proceeds for the same around advice are not supported, subsequent proceed has been ignored.",
       "\n\tadvice: ",
       advice,
       "\n\trule: ",
