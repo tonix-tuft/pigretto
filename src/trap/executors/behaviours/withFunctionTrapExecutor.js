@@ -77,7 +77,7 @@ export const withFunctionTrapExecutor = superclass => {
         );
       }
       const params = this.execContextStack[this.execContextID].finalParams;
-      if (isArray(this.execContextStack[this.execContextID].finalParams)) {
+      if (isArray(params)) {
         trapArgs = [...trapArgs];
         trapArgs[argumentsListIndex] = params;
       }
