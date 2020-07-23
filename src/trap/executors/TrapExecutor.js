@@ -93,6 +93,7 @@ export default class TrapExecutor {
       this.newExecutionContext();
       this.startExecutionContext(trapArgs);
       this.beforePhase(trapArgs, before);
+      // TODO: Flat Proceed API
       this.aroundPhase(trapArgs, around);
       const returnValue = this.proceedPhase(trapArgs);
       this.afterPhase(trapArgs, after, returnValue);
@@ -266,6 +267,8 @@ export default class TrapExecutor {
       TrapExecutor.transversalExecContextStack[
         TrapExecutor.transversalExecContextID
       ].finalParams = this.execContextStack[this.execContextID].finalParams;
+
+      // TODO: Flat Proceed API
     };
     const returnValue = this.executeAroundAdvice(
       trapArgs,

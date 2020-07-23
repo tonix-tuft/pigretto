@@ -63,6 +63,7 @@ export default class PropertyGettingPointcut extends Pointcut {
    * @return {PropertyGettingPointcut} This pointcut (fluent interface).
    */
   around(adviceFn) {
+    // TODO: Flat Proceed API
     this.advices.push(new AroundAdvice(adviceFn));
     return this;
   }

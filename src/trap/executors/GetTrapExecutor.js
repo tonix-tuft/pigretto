@@ -46,6 +46,7 @@ export default class GetTrapExecutor extends TrapExecutor {
       receiver,
       rule,
     };
+    // TODO: Flat Proceed API
     const returnValue = this.notWithinExecContext(() => {
       const returnValue = advice.fn.apply(context, [proceed]);
       return returnValue;

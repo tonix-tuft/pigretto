@@ -91,6 +91,7 @@ export default withFunctionTrapExecutor(
         receiver,
         rule,
       };
+      // TODO: Flat Proceed API
       const returnValue = this.notWithinExecContext(() => {
         const returnValue = advice.fn
           .call(context, proceed)

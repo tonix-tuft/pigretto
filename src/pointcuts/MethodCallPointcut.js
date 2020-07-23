@@ -67,6 +67,7 @@ export default class MethodCallPointcut extends Pointcut {
    * @return {MethodCallPointcut} This pointcut (fluent interface).
    */
   around(adviceFn) {
+    // TODO: Flat Proceed API
     this.advices.push(new AroundAdvice(adviceFn));
     return this;
   }
