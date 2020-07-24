@@ -229,6 +229,7 @@ export default class TrapExecutor {
    * @private
    */
   aroundPhase(trapArgs, around) {
+    // TODO: Flat Proceed API
     for (const { rule, advice } of around) {
       this.executeAround(trapArgs, advice, rule);
       if (
@@ -301,14 +302,12 @@ export default class TrapExecutor {
    * @private
    */
   proceedPhase(trapArgs) {
+    // TODO: Flat Proceed API
     let returnValue;
     if (
       this.execContextStack[this.execContextID].returnValue !== noReturnValue
     ) {
-      returnValue = this.return(
-        trapArgs,
-        this.execContextStack[this.execContextID].returnValue
-      );
+      returnValue = this.execContextStack[this.execContextID].returnValue;
     } else {
       returnValue = this.performUnderlyingOperation(trapArgs);
     }

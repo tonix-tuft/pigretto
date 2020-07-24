@@ -25,4 +25,9 @@
 
 import Advice from "./Advice";
 
-export default class AroundAdvice extends Advice {}
+export default class AroundAdvice extends Advice {
+  constructor(fn, { flat = false } = {}) {
+    super(fn);
+    this.flat = flat;
+  }
+}

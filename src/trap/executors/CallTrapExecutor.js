@@ -90,6 +90,7 @@ export default withFunctionTrapExecutor(
         property,
         receiver,
         rule,
+        flat: advice.flat
       };
       // TODO: Flat Proceed API
       const returnValue = this.notWithinExecContext(() => {

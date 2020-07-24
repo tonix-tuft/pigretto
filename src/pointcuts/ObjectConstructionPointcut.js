@@ -61,14 +61,32 @@ export default class ObjectConstructionPointcut extends Pointcut {
    * @param {Function} adviceFn The advice function. A higher-order function which will receive the "proceed"
    *                            function as parameter and which MUST return a function which will receive the constructor parameters
    *                            of the underlying object construction.
-   *                            If the advice function proceeds, the callback given to "proceed" will receive
-   *                            the instance object to return to the caller or may return another instance
-   *                            instead of the current one.
+   *
+   *                            When not using the Flat Proceed API, if the advice function proceeds, the callback given to "proceed" will receive
+   *                            the instance object to return to the caller or may return another instance instead of the current one.
+   *
+   *                            When using the Flat Proceed API, if the advice function proceeds, the instance object to return to the caller will be returned
+   *                            by the "proceed" function. The advice function may return another instance instead of the one returned.
+   * @param {Object} [options] An optional object with options.
+   * @param {boolean} [options.flat=false] Whether or not this around advice should use the Flat Proceed API.
+   *                                       Defaults to false.
    * @return {ObjectConstructionPointcut} This pointcut (fluent interface).
    */
-  around(adviceFn) {
-    // TODO: Flat Proceed API
-    this.advices.push(new AroundAdvice(adviceFn));
+  around(adviceFn, { flat = false } = {}) {
+    this.advices.push(new AroundAdvice(adviceFn, { flat }));
     return this;
+  }
+
+  /**
+   * Register an around advice using the Flat Proceed API for this pointcut.
+   * This is a shortcut for and is the same as using "around(adviceFn, { flat: true })", i.e. calling "around" with the "flat" option set to true.
+   *
+   * @param {Function} adviceFn The advice function as in the "around" method.
+   * @return {ObjectConstructionPointcut} This pointcut (fluent interface).
+   */
+  flatAround(adviceFn) {
+    return this.around(adviceFn, {
+      flat: true,
+    });
   }
 }

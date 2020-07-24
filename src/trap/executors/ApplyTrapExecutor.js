@@ -54,6 +54,7 @@ export default withFunctionTrapExecutor(
         target,
         thisArg,
         rule,
+        flat: advice.flat
       };
       // TODO: Flat Proceed API
       const returnValue = this.notWithinExecContext(() => {
