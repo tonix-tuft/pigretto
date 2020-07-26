@@ -25,6 +25,7 @@
 
 import TrapExecutor from "./TrapExecutor";
 import reflectGet from "../reflect/reflectGet";
+import { shallowExtend } from "js-utl";
 
 export default class GetTrapExecutor extends TrapExecutor {
   executeBeforeAdvice([target, property, receiver], advice, rule) {
@@ -39,15 +40,20 @@ export default class GetTrapExecutor extends TrapExecutor {
     });
   }
 
-  executeAroundAdvice([target, property, receiver], advice, rule, proceed) {
-    const context = {
+  executeAroundAdvice(
+    [target, property, receiver],
+    advice,
+    rule,
+    proceed,
+    context
+  ) {
+    shallowExtend(context, {
       target,
       property,
       receiver,
       rule,
-      flat: advice.flat
-    };
-    // TODO: Flat Proceed API
+      flat: advice.flat,
+    });
     const returnValue = this.notWithinExecContext(() => {
       const returnValue = advice.fn.apply(context, [proceed]);
       return returnValue;
@@ -66,6 +72,11 @@ export default class GetTrapExecutor extends TrapExecutor {
       property,
       receiver,
       rule,
+      hasPerformedUnderlyingOperation: this.execContextStack[this.execContextID]
+        .hasPerformedUnderlyingOperation,
+      hasEffectivelyPerformedUnderlyingOperation: TrapExecutor.getTransversalExecContextStackData(
+        "hasEffectivelyPerformedUnderlyingOperation"
+      ),
     };
     this.notWithinExecContext(() => {
       advice.fn.apply(context, [propertyValue]);
@@ -73,10 +84,14 @@ export default class GetTrapExecutor extends TrapExecutor {
   }
 
   performUnderlyingOperation([target, property, receiver]) {
-    const propertyValue = this.notWithinExecContext(() => {
-      const propertyValue = reflectGet(target, property, receiver);
-      return propertyValue;
-    }, target);
+    const propertyValue = this.notWithinExecContext(
+      () => {
+        const propertyValue = reflectGet(target, property, receiver);
+        return propertyValue;
+      },
+      target,
+      true
+    );
     return propertyValue;
   }
 
@@ -91,6 +106,11 @@ export default class GetTrapExecutor extends TrapExecutor {
       property,
       receiver,
       rule,
+      hasPerformedUnderlyingOperation: this.execContextStack[this.execContextID]
+        .hasPerformedUnderlyingOperation,
+      hasEffectivelyPerformedUnderlyingOperation: TrapExecutor.getTransversalExecContextStackData(
+        "hasEffectivelyPerformedUnderlyingOperation"
+      ),
     };
     return this.notWithinExecContext(() => {
       return callback.apply(context, [propertyValue]);

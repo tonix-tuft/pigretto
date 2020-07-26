@@ -26,7 +26,7 @@
 import TrapExecutor from "./TrapExecutor";
 import reflectSet from "../reflect/reflectSet";
 import reflectGet from "../reflect/reflectGet";
-import { isArray } from "js-utl";
+import { isArray, shallowExtend } from "js-utl";
 
 export default class SetTrapExecutor extends TrapExecutor {
   previousPropertyValueMap = {};
@@ -85,21 +85,21 @@ export default class SetTrapExecutor extends TrapExecutor {
     [target, property, value, receiver],
     advice,
     rule,
-    proceed
+    proceed,
+    context
   ) {
     value = this.getFinalValue(value);
     const previousPropertyValue = this.previousPropertyValueMap[
       this.execContextID
     ];
-    const context = {
+    shallowExtend(context, {
       target,
       property,
       value,
       receiver,
       rule,
-      flat: advice.flat
-    };
-    // TODO: Flat Proceed API
+      flat: advice.flat,
+    });
     const returnValue = this.notWithinExecContext(() => {
       const returnValue = advice.fn
         .call(context, proceed)
@@ -127,6 +127,11 @@ export default class SetTrapExecutor extends TrapExecutor {
       receiver,
       rule,
       updateWasSuccessful,
+      hasPerformedUnderlyingOperation: this.execContextStack[this.execContextID]
+        .hasPerformedUnderlyingOperation,
+      hasEffectivelyPerformedUnderlyingOperation: TrapExecutor.getTransversalExecContextStackData(
+        "hasEffectivelyPerformedUnderlyingOperation"
+      ),
     };
     this.notWithinExecContext(() => {
       advice.fn
@@ -137,10 +142,19 @@ export default class SetTrapExecutor extends TrapExecutor {
 
   performUnderlyingOperation([target, property, value, receiver]) {
     value = this.getFinalValue(value);
-    const updateWasSuccessful = this.notWithinExecContext(() => {
-      const updateWasSuccessful = reflectSet(target, property, value, receiver);
-      return updateWasSuccessful;
-    }, target);
+    const updateWasSuccessful = this.notWithinExecContext(
+      () => {
+        const updateWasSuccessful = reflectSet(
+          target,
+          property,
+          value,
+          receiver
+        );
+        return updateWasSuccessful;
+      },
+      target,
+      true
+    );
     this.updateWasSuccessfulMap[this.execContextID] = updateWasSuccessful;
     this.returnNewPropertyValueMap[this.execContextID] = value;
     return value;
@@ -159,6 +173,11 @@ export default class SetTrapExecutor extends TrapExecutor {
       value,
       receiver,
       rule,
+      hasPerformedUnderlyingOperation: this.execContextStack[this.execContextID]
+        .hasPerformedUnderlyingOperation,
+      hasEffectivelyPerformedUnderlyingOperation: TrapExecutor.getTransversalExecContextStackData(
+        "hasEffectivelyPerformedUnderlyingOperation"
+      ),
     };
     const returnValue = this.notWithinExecContext(() => {
       return callback.apply(context, [newPropertyValue]);

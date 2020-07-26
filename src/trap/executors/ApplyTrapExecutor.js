@@ -26,6 +26,7 @@
 import TrapExecutor from "./TrapExecutor";
 import reflectApply from "../reflect/reflectApply";
 import { withFunctionTrapExecutor } from "./behaviours/withFunctionTrapExecutor";
+import { shallowExtend } from "js-utl";
 
 export default withFunctionTrapExecutor(
   class ApplyTrapExecutor extends TrapExecutor {
@@ -48,15 +49,15 @@ export default withFunctionTrapExecutor(
       [target, thisArg, argumentsList],
       advice,
       rule,
-      proceed
+      proceed,
+      context
     ) {
-      const context = {
+      shallowExtend(context, {
         target,
         thisArg,
         rule,
-        flat: advice.flat
-      };
-      // TODO: Flat Proceed API
+        flat: advice.flat,
+      });
       const returnValue = this.notWithinExecContext(() => {
         const returnValue = advice.fn
           .call(context, proceed)
@@ -80,6 +81,12 @@ export default withFunctionTrapExecutor(
           "finalParams",
           argumentsList
         ),
+        hasPerformedUnderlyingOperation: this.execContextStack[
+          this.execContextID
+        ].hasPerformedUnderlyingOperation,
+        hasEffectivelyPerformedUnderlyingOperation: TrapExecutor.getTransversalExecContextStackData(
+          "hasEffectivelyPerformedUnderlyingOperation"
+        ),
       };
       this.notWithinExecContext(() => {
         advice.fn.call(context, ...argumentsList).apply(context, [returnValue]);
@@ -87,10 +94,14 @@ export default withFunctionTrapExecutor(
     }
 
     performUnderlyingOperation([target, thisArg, argumentsList]) {
-      const returnValue = this.notWithinExecContext(() => {
-        const returnValue = reflectApply(target, thisArg, argumentsList);
-        return returnValue;
-      }, target);
+      const returnValue = this.notWithinExecContext(
+        () => {
+          const returnValue = reflectApply(target, thisArg, argumentsList);
+          return returnValue;
+        },
+        target,
+        true
+      );
       return returnValue;
     }
 
@@ -108,6 +119,12 @@ export default withFunctionTrapExecutor(
         effectiveArgumentsList: TrapExecutor.getTransversalExecContextStackData(
           "finalParams",
           argumentsList
+        ),
+        hasPerformedUnderlyingOperation: this.execContextStack[
+          this.execContextID
+        ].hasPerformedUnderlyingOperation,
+        hasEffectivelyPerformedUnderlyingOperation: TrapExecutor.getTransversalExecContextStackData(
+          "hasEffectivelyPerformedUnderlyingOperation"
         ),
       };
       return this.notWithinExecContext(() => {

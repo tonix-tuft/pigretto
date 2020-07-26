@@ -23,13 +23,13 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { isArray } from "js-utl";
+import { isArray, chain } from "js-utl";
+import declarativeFactory from "declarative-factory";
 import { isPigrettoProxy } from "../../props";
-
-/**
- * @type {Symbol}
- */
-const noReturnValue = Symbol("noReturnValue");
+import {
+  flatProceedAPIAroundAdviceFactory,
+  proceedAPIAroundAdviceFactory,
+} from "./factory/aroundAdviceFactory";
 
 export default class TrapExecutor {
   static isWithinExecContext = false;
@@ -47,6 +47,7 @@ export default class TrapExecutor {
   static newTransversalExecutionContext() {
     const context = {
       finalParams: void 0,
+      hasEffectivelyPerformedUnderlyingOperation: false,
     };
     TrapExecutor.transversalExecContextStack.push(context);
     TrapExecutor.transversalExecContextID++;
@@ -93,9 +94,7 @@ export default class TrapExecutor {
       this.newExecutionContext();
       this.startExecutionContext(trapArgs);
       this.beforePhase(trapArgs, before);
-      // TODO: Flat Proceed API
-      this.aroundPhase(trapArgs, around);
-      const returnValue = this.proceedPhase(trapArgs);
+      const returnValue = this.aroundProceedPhase(trapArgs, around);
       this.afterPhase(trapArgs, after, returnValue);
       this.endExecutionContext(trapArgs);
       this.cleanUpExecutionContext();
@@ -121,9 +120,19 @@ export default class TrapExecutor {
     return returnValue;
   }
 
-  notWithinExecContext(callback, target = void 0) {
+  notWithinExecContext(
+    callback,
+    target = void 0,
+    isPerformingUnderlyingOperation = false
+  ) {
     const current = TrapExecutor.isWithinExecContext;
-    if (!target || !target[isPigrettoProxy]) {
+    const isTargetPigrettoProxy = target && target[isPigrettoProxy];
+    if (isPerformingUnderlyingOperation && !isTargetPigrettoProxy && target) {
+      TrapExecutor.transversalExecContextStack[
+        TrapExecutor.transversalExecContextID
+      ].hasEffectivelyPerformedUnderlyingOperation = true;
+    }
+    if (!isTargetPigrettoProxy) {
       TrapExecutor.isWithinExecContext = false;
     }
     const returnValue = callback();
@@ -136,9 +145,8 @@ export default class TrapExecutor {
    */
   newExecutionContext() {
     const context = {
-      proceeds: [],
-      returnValue: noReturnValue,
       finalParams: void 0,
+      hasPerformedUnderlyingOperation: false,
     };
     this.execContextStack.push(context);
     this.execContextID++;
@@ -182,7 +190,7 @@ export default class TrapExecutor {
   }
 
   // eslint-disable-next-line no-unused-vars
-  executeAroundAdvice(trapArgs, advice, rule, proceed) {
+  executeAroundAdvice(trapArgs, advice, rule, proceed, context) {
     throw new Error(
       `pigretto - ${this.constructor.name} trap executor does not implement "executeAroundAdvice".`
     );
@@ -228,63 +236,6 @@ export default class TrapExecutor {
   /**
    * @private
    */
-  aroundPhase(trapArgs, around) {
-    // TODO: Flat Proceed API
-    for (const { rule, advice } of around) {
-      this.executeAround(trapArgs, advice, rule);
-      if (
-        this.execContextStack[this.execContextID].returnValue !== noReturnValue
-      ) {
-        break;
-      }
-    }
-  }
-
-  /**
-   * @private
-   */
-  executeAround(trapArgs, advice, rule) {
-    let hasProceeded = false;
-    const proceed = (params = void 0, fn = void 0) => {
-      if (hasProceeded) {
-        this.unsupportedMultipleProceeds(advice, rule);
-        return;
-      }
-      hasProceeded = true;
-      let finalParams = void 0;
-      let finalFn = void 0;
-      if (isArray(params)) {
-        finalParams = params;
-        finalFn = typeof fn === "function" ? fn : void 0;
-      } else if (typeof params === "function") {
-        finalFn = params;
-      }
-      this.execContextStack[this.execContextID].proceeds.push({
-        fn: finalFn,
-        rule,
-      });
-      this.execContextStack[this.execContextID].finalParams =
-        finalParams || this.execContextStack[this.execContextID].finalParams;
-      TrapExecutor.transversalExecContextStack[
-        TrapExecutor.transversalExecContextID
-      ].finalParams = this.execContextStack[this.execContextID].finalParams;
-
-      // TODO: Flat Proceed API
-    };
-    const returnValue = this.executeAroundAdvice(
-      trapArgs,
-      advice,
-      rule,
-      proceed
-    );
-    if (!hasProceeded) {
-      this.execContextStack[this.execContextID].returnValue = returnValue;
-    }
-  }
-
-  /**
-   * @private
-   */
   afterPhase(trapArgs, after, returnValue) {
     for (const { rule, advice } of after) {
       this.executeAfter(trapArgs, advice, rule, returnValue);
@@ -301,37 +252,86 @@ export default class TrapExecutor {
   /**
    * @private
    */
-  proceedPhase(trapArgs) {
-    // TODO: Flat Proceed API
-    let returnValue;
-    if (
-      this.execContextStack[this.execContextID].returnValue !== noReturnValue
-    ) {
-      returnValue = this.execContextStack[this.execContextID].returnValue;
-    } else {
-      returnValue = this.performUnderlyingOperation(trapArgs);
-    }
-    for (
-      let i = this.execContextStack[this.execContextID].proceeds.length - 1;
-      i >= 0;
-      i--
-    ) {
-      const { fn: callback, rule } = this.execContextStack[
-        this.execContextID
-      ].proceeds[i];
-      if (typeof callback === "function") {
-        returnValue = this.executeProceedCallback(
+  aroundProceedPhase(trapArgs, around) {
+    const aroundAdvicesMiddlewares = around.map(
+      ({ advice, rule }) => ([trapArgs], next) => {
+        const aroundAdviceFactory = declarativeFactory([
+          [advice.flat, flatProceedAPIAroundAdviceFactory],
+          proceedAPIAroundAdviceFactory,
+        ]);
+
+        let proceedCallback = void 0;
+        let proceedReturnValue = void 0;
+        let hasProceeded = false;
+        const context = {};
+        const proceed = (params = void 0, fn = void 0) => {
+          if (hasProceeded) {
+            this.unsupportedMultipleProceeds(advice, rule);
+            return proceedReturnValue;
+          }
+          hasProceeded = true;
+          let finalParams = void 0;
+          let finalFn = void 0;
+          if (isArray(params)) {
+            finalParams = params;
+            finalFn = typeof fn === "function" ? fn : void 0;
+          } else if (typeof params === "function") {
+            finalFn = params;
+          }
+          proceedCallback = finalFn;
+
+          this.execContextStack[this.execContextID].finalParams =
+            finalParams ||
+            this.execContextStack[this.execContextID].finalParams;
+          TrapExecutor.transversalExecContextStack[
+            TrapExecutor.transversalExecContextID
+          ].finalParams = this.execContextStack[this.execContextID].finalParams;
+
+          proceedReturnValue = aroundAdviceFactory.proceedWithinProceed({
+            trapExecutor: this,
+            trapArgs,
+            next,
+            context,
+          });
+          return proceedReturnValue;
+        };
+        const returnValue = this.executeAroundAdvice(
           trapArgs,
+          advice,
           rule,
-          returnValue,
-          callback
+          proceed,
+          context
         );
+        if (!hasProceeded) {
+          return returnValue;
+        } else {
+          return aroundAdviceFactory.proceedOutOfProceed({
+            trapExecutor: this,
+            trapArgs,
+            rule,
+            returnValue,
+            proceedCallback,
+            next,
+          });
+        }
       }
-    }
-    return this.return(trapArgs, returnValue);
+    );
+    aroundAdvicesMiddlewares.push(([trapArgs]) => {
+      this.execContextStack[
+        this.execContextID
+      ].hasPerformedUnderlyingOperation = true;
+      return this.performUnderlyingOperation(trapArgs);
+    });
+    const aroundProceedChain = chain(aroundAdvicesMiddlewares);
+    let returnValue = aroundProceedChain(trapArgs);
+    returnValue = this.return(trapArgs, returnValue);
+    return returnValue;
   }
 
   return(trapArgs, returnValue) {
     return returnValue;
   }
+
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-empty-function
+  mutateFlatProceedContext(trapArgs, context) {}
 }

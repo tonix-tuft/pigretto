@@ -23,8 +23,9 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { isArray } from "js-utl";
+import { isArray, shallowExtend } from "js-utl";
 import { throwErrorIfDoesNotImplement } from "./common/throwErrorIfDoesNotImplement";
+import TrapExecutor from "../TrapExecutor";
 
 export const withFunctionTrapExecutor = superclass => {
   const NewClass = class extends superclass {
@@ -84,7 +85,7 @@ export const withFunctionTrapExecutor = superclass => {
       return trapArgs;
     }
 
-    executeAroundAdvice(trapArgs, advice, rule, proceed) {
+    executeAroundAdvice(trapArgs, advice, rule, proceed, context) {
       trapArgs = this.getFinalTrapArgs(trapArgs);
       !this.executedAtLeastOnce &&
         throwErrorIfDoesNotImplement(
@@ -92,7 +93,13 @@ export const withFunctionTrapExecutor = superclass => {
           "executeAroundAdvice",
           superclass
         );
-      return super.executeAroundAdvice(trapArgs, advice, rule, proceed);
+      return super.executeAroundAdvice(
+        trapArgs,
+        advice,
+        rule,
+        proceed,
+        context
+      );
     }
 
     executeAfterAdvice(trapArgs, advice, rule, returnValue) {
@@ -131,6 +138,25 @@ export const withFunctionTrapExecutor = superclass => {
         returnValue,
         callback
       );
+    }
+
+    mutateFlatProceedContext(trapArgs, context) {
+      trapArgs = this.getFinalTrapArgs(trapArgs);
+      const trapArgsArgumentsListIndex = this.getTrapArgsArgumentsListIndex();
+      const argumentsList = trapArgs[trapArgsArgumentsListIndex];
+      shallowExtend(context, {
+        argumentsList,
+        effectiveArgumentsList: TrapExecutor.getTransversalExecContextStackData(
+          "finalParams",
+          argumentsList
+        ),
+        hasPerformedUnderlyingOperation: this.execContextStack[
+          this.execContextID
+        ].hasPerformedUnderlyingOperation,
+        hasEffectivelyPerformedUnderlyingOperation: TrapExecutor.getTransversalExecContextStackData(
+          "hasEffectivelyPerformedUnderlyingOperation"
+        ),
+      });
     }
   };
   Object.defineProperty(NewClass, "name", {
