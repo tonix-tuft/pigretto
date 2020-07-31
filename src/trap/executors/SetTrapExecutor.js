@@ -28,12 +28,21 @@ import reflectSet from "../reflect/reflectSet";
 import reflectGet from "../reflect/reflectGet";
 import { isArray, shallowExtend } from "js-utl";
 
+/**
+ * @type {Object}
+ */
+const noValue = {};
+
+const performUnderlyingOperationNoValue = {};
+
 export default class SetTrapExecutor extends TrapExecutor {
   previousPropertyValueMap = {};
   returnNewPropertyValueMap = {};
   updateWasSuccessfulMap = {};
+  originalValue = {};
+  performUnderlyingOperationValueMap = {};
 
-  startExecutionContext([target, property, , receiver]) {
+  startExecutionContext([target, property, value, receiver]) {
     if (
       !Object.prototype.hasOwnProperty.call(
         this.previousPropertyValueMap,
@@ -45,8 +54,12 @@ export default class SetTrapExecutor extends TrapExecutor {
         return previousPropertyValue;
       }, target);
       this.previousPropertyValueMap[this.execContextID] = previousPropertyValue;
-      this.returnNewPropertyValueMap[this.execContextID] = void 0;
+      this.returnNewPropertyValueMap[this.execContextID] = noValue;
       this.updateWasSuccessfulMap[this.execContextID] = false;
+      this.originalValue[this.execContextID] = value;
+      this.performUnderlyingOperationValueMap[
+        this.execContextID
+      ] = performUnderlyingOperationNoValue;
     }
   }
 
@@ -54,16 +67,20 @@ export default class SetTrapExecutor extends TrapExecutor {
     delete this.previousPropertyValueMap[this.execContextID];
     delete this.returnNewPropertyValueMap[this.execContextID];
     delete this.updateWasSuccessfulMap[this.execContextID];
+    delete this.originalValue[this.execContextID];
+    delete this.performUnderlyingOperationValueMap[this.execContextID];
   }
 
   executeBeforeAdvice([target, property, value, receiver], advice, rule) {
     const previousPropertyValue = this.previousPropertyValueMap[
       this.execContextID
     ];
+    const originalValue = this.originalValue[this.execContextID];
     const context = {
       target,
       property,
       value,
+      originalValue,
       receiver,
       rule,
     };
@@ -73,10 +90,8 @@ export default class SetTrapExecutor extends TrapExecutor {
   }
 
   getFinalValue(value) {
-    const params = this.execContextStack[this.execContextID].finalParams;
-    if (isArray(params)) {
-      const [finalValue] = params;
-      value = finalValue;
+    if (this.returnNewPropertyValueMap[this.execContextID] !== noValue) {
+      value = this.returnNewPropertyValueMap[this.execContextID];
     }
     return value;
   }
@@ -92,10 +107,12 @@ export default class SetTrapExecutor extends TrapExecutor {
     const previousPropertyValue = this.previousPropertyValueMap[
       this.execContextID
     ];
+    const originalValue = this.originalValue[this.execContextID];
     shallowExtend(context, {
       target,
       property,
       value,
+      originalValue,
       receiver,
       rule,
       flat: advice.flat,
@@ -120,10 +137,12 @@ export default class SetTrapExecutor extends TrapExecutor {
       this.execContextID
     ];
     const newPropertyValue = this.returnNewPropertyValueMap[this.execContextID];
+    const originalValue = this.originalValue[this.execContextID];
     const context = {
       target,
       property,
       value,
+      originalValue,
       receiver,
       rule,
       updateWasSuccessful,
@@ -157,6 +176,7 @@ export default class SetTrapExecutor extends TrapExecutor {
     );
     this.updateWasSuccessfulMap[this.execContextID] = updateWasSuccessful;
     this.returnNewPropertyValueMap[this.execContextID] = value;
+    this.performUnderlyingOperationValueMap[this.execContextID] = value;
     return value;
   }
 
@@ -167,10 +187,12 @@ export default class SetTrapExecutor extends TrapExecutor {
     callback
   ) {
     value = this.getFinalValue(value);
+    const originalValue = this.originalValue[this.execContextID];
     const context = {
       target,
       property,
       value,
+      originalValue,
       receiver,
       rule,
       hasPerformedUnderlyingOperation: this.execContextStack[this.execContextID]
@@ -182,11 +204,16 @@ export default class SetTrapExecutor extends TrapExecutor {
     const returnValue = this.notWithinExecContext(() => {
       return callback.apply(context, [newPropertyValue]);
     });
+    this.returnNewPropertyValueMap[this.execContextID] = returnValue;
     return returnValue;
   }
 
   return([target, property, , receiver], returnValue) {
-    if (returnValue !== this.returnNewPropertyValueMap[this.execContextID]) {
+    if (
+      this.performUnderlyingOperationValueMap[this.execContextID] !==
+        this.returnNewPropertyValueMap[this.execContextID] ||
+      returnValue !== this.returnNewPropertyValueMap[this.execContextID]
+    ) {
       this.performUnderlyingOperation([
         target,
         property,
@@ -195,5 +222,16 @@ export default class SetTrapExecutor extends TrapExecutor {
       ]);
     }
     return this.updateWasSuccessfulMap[this.execContextID];
+  }
+
+  onProceed(finalParams) {
+    if (isArray(finalParams)) {
+      const [value] = finalParams;
+      this.returnNewPropertyValueMap[this.execContextID] = value;
+    }
+  }
+
+  onNoProceed(returnValue) {
+    this.returnNewPropertyValueMap[this.execContextID] = returnValue;
   }
 }

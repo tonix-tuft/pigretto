@@ -287,6 +287,8 @@ export default class TrapExecutor {
             TrapExecutor.transversalExecContextID
           ].finalParams = this.execContextStack[this.execContextID].finalParams;
 
+          this.onProceed(this.execContextStack[this.execContextID].finalParams);
+
           proceedReturnValue = aroundAdviceFactory.proceedWithinProceed({
             trapExecutor: this,
             trapArgs,
@@ -303,6 +305,7 @@ export default class TrapExecutor {
           context
         );
         if (!hasProceeded) {
+          this.onNoProceed(returnValue);
           return returnValue;
         } else {
           return aroundAdviceFactory.proceedOutOfProceed({
@@ -334,4 +337,10 @@ export default class TrapExecutor {
 
   // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-empty-function
   mutateFlatProceedContext(trapArgs, context) {}
+
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-empty-function
+  onProceed(finalParams) {}
+
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-empty-function
+  onNoProceed(returnValue) {}
 }
