@@ -26,11 +26,13 @@
 import TrapExecutor from "./TrapExecutor";
 import reflectGet from "../reflect/reflectGet";
 import { shallowExtend } from "js-utl";
+import { PIGRETTO_EFFECTIVE_TARGET_PROP } from "../../constants";
 
 export default class GetTrapExecutor extends TrapExecutor {
   executeBeforeAdvice([target, property, receiver], advice, rule) {
     const context = {
       target,
+      effectiveTarget: receiver[PIGRETTO_EFFECTIVE_TARGET_PROP],
       property,
       receiver,
       rule,
@@ -49,6 +51,7 @@ export default class GetTrapExecutor extends TrapExecutor {
   ) {
     shallowExtend(context, {
       target,
+      effectiveTarget: receiver[PIGRETTO_EFFECTIVE_TARGET_PROP],
       property,
       receiver,
       rule,
@@ -69,6 +72,7 @@ export default class GetTrapExecutor extends TrapExecutor {
   ) {
     const context = {
       target,
+      effectiveTarget: receiver[PIGRETTO_EFFECTIVE_TARGET_PROP],
       property,
       receiver,
       rule,
@@ -103,6 +107,7 @@ export default class GetTrapExecutor extends TrapExecutor {
   ) {
     const context = {
       target,
+      effectiveTarget: receiver[PIGRETTO_EFFECTIVE_TARGET_PROP],
       property,
       receiver,
       rule,

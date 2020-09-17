@@ -27,6 +27,7 @@ import TrapExecutor from "./TrapExecutor";
 import reflectConstruct from "../reflect/reflectConstruct";
 import { withFunctionTrapExecutor } from "./behaviours/withFunctionTrapExecutor";
 import { shallowExtend } from "js-utl";
+import { PIGRETTO_EFFECTIVE_TARGET_PROP } from "../../constants";
 
 export default withFunctionTrapExecutor(
   class ConstructTrapExecutor extends TrapExecutor {
@@ -37,6 +38,7 @@ export default withFunctionTrapExecutor(
     executeBeforeAdvice([target, argumentsList, newTarget], advice, rule) {
       const context = {
         target,
+        effectiveTarget: target[PIGRETTO_EFFECTIVE_TARGET_PROP] || target,
         newTarget,
         rule,
       };
@@ -54,6 +56,7 @@ export default withFunctionTrapExecutor(
     ) {
       shallowExtend(context, {
         target,
+        effectiveTarget: target[PIGRETTO_EFFECTIVE_TARGET_PROP] || target,
         newTarget,
         rule,
         flat: advice.flat,
@@ -75,6 +78,7 @@ export default withFunctionTrapExecutor(
     ) {
       const context = {
         target,
+        effectiveTarget: target[PIGRETTO_EFFECTIVE_TARGET_PROP] || target,
         newTarget,
         rule,
         effectiveArgumentsList: TrapExecutor.getTransversalExecContextStackData(
@@ -113,6 +117,7 @@ export default withFunctionTrapExecutor(
     ) {
       const context = {
         target,
+        effectiveTarget: target[PIGRETTO_EFFECTIVE_TARGET_PROP] || target,
         newTarget,
         rule,
         argumentsList,

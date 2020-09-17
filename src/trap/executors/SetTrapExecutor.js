@@ -27,6 +27,7 @@ import TrapExecutor from "./TrapExecutor";
 import reflectSet from "../reflect/reflectSet";
 import reflectGet from "../reflect/reflectGet";
 import { isArray, shallowExtend } from "js-utl";
+import { PIGRETTO_EFFECTIVE_TARGET_PROP } from "../../constants";
 
 /**
  * @type {Object}
@@ -78,6 +79,7 @@ export default class SetTrapExecutor extends TrapExecutor {
     const originalValue = this.originalValue[this.execContextID];
     const context = {
       target,
+      effectiveTarget: receiver[PIGRETTO_EFFECTIVE_TARGET_PROP],
       property,
       value,
       originalValue,
@@ -110,6 +112,7 @@ export default class SetTrapExecutor extends TrapExecutor {
     const originalValue = this.originalValue[this.execContextID];
     shallowExtend(context, {
       target,
+      effectiveTarget: receiver[PIGRETTO_EFFECTIVE_TARGET_PROP],
       property,
       value,
       originalValue,
@@ -140,6 +143,7 @@ export default class SetTrapExecutor extends TrapExecutor {
     const originalValue = this.originalValue[this.execContextID];
     const context = {
       target,
+      effectiveTarget: receiver[PIGRETTO_EFFECTIVE_TARGET_PROP],
       property,
       value,
       originalValue,
@@ -190,6 +194,7 @@ export default class SetTrapExecutor extends TrapExecutor {
     const originalValue = this.originalValue[this.execContextID];
     const context = {
       target,
+      effectiveTarget: receiver[PIGRETTO_EFFECTIVE_TARGET_PROP],
       property,
       value,
       originalValue,

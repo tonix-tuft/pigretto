@@ -33,12 +33,12 @@
     "build-module": "cross-env BABEL_ENV=module ./node_modules/.bin/babel ./src --out-dir ./dist/es6 --source-maps --copy-files"
   },
   "devDependencies": {
-    "@babel/cli": "^7.10.5",
-    "@babel/core": "^7.11.0",
+    "@babel/cli": "^7.11.6",
+    "@babel/core": "^7.11.6",
     "@babel/plugin-proposal-class-properties": "^7.10.4",
     "@babel/plugin-proposal-object-rest-spread": "^7.11.0",
-    "@babel/plugin-transform-runtime": "^7.11.0",
-    "@babel/preset-env": "^7.11.0",
+    "@babel/plugin-transform-runtime": "^7.11.5",
+    "@babel/preset-env": "^7.11.5",
     "@typescript-eslint/eslint-plugin": "^2.34.0",
     "@typescript-eslint/parser": "^2.34.0",
     "babel-loader": "^8.1.0",
@@ -48,7 +48,7 @@
     "minimist": ">=1.2.3",
     "regenerator-runtime": "^0.13.7",
     "serialize-javascript": "^3.1.0",
-    "terser-webpack-plugin": "^3.0.8",
+    "terser-webpack-plugin": "^3.1.0",
     "typescript": "^3.9.7",
     "webpack": "^4.44.1",
     "webpack-cli": "^3.3.12"
@@ -60,7 +60,7 @@
   "dependencies": {
     "declarative-factory": "^1.13.0",
     "escape-string-regexp": "^2.0.0",
-    "js-utl": "^4.28.0"
+    "js-utl": "^4.30.0"
   },
   "files": [
     "dist",

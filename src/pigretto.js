@@ -24,6 +24,8 @@
  */
 
 import handlerFactory from "./factory/handlerFactory";
+import { isPigrettoProxy } from "./props";
+import { PIGRETTO_EFFECTIVE_TARGET_PROP } from "./constants";
 
 /**
  * Generates a new pigretto proxy object.
@@ -51,6 +53,13 @@ import handlerFactory from "./factory/handlerFactory";
  */
 export default function pigretto(target, proxyRules) {
   const handler = handlerFactory(proxyRules);
+  let effectiveTarget;
+  if (target[isPigrettoProxy]) {
+    effectiveTarget = target[PIGRETTO_EFFECTIVE_TARGET_PROP];
+  } else {
+    effectiveTarget = target;
+  }
   const proxy = new Proxy(target, handler);
+  proxy[PIGRETTO_EFFECTIVE_TARGET_PROP] = effectiveTarget;
   return proxy;
 }

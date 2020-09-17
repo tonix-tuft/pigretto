@@ -27,6 +27,10 @@ import rulesGenerator from "../rules/rulesGenerator";
 import parseRule from "../rules/parser/parseRule";
 import Trap from "./Trap";
 import { isPigrettoProxy } from "../props";
+import { PIGRETTO_EFFECTIVE_TARGET_PROP } from "../constants";
+import reflectGet from "./reflect/reflectGet";
+import reflectSet from "./reflect/reflectSet";
+import { defineProperty } from "js-utl";
 
 /**
  * Generates a new trap handler object for the given rules.
@@ -43,32 +47,43 @@ export default function trapHandlerForRules(proxyRules) {
     trap.addPointcutRule(pointcut, parsedRule);
   }
 
+  const privateScope = {};
   return {
-    ...(trap.hasGets()
-      ? {
-          // Trap for property access (getting) and method call.
-          get(target, property, receiver) {
-            if (property === isPigrettoProxy) {
-              return true;
-            }
-            return trap.get(target, property, receiver);
-          },
+    ...{
+      // Trap for property access (getting) and method call.
+      get(target, property, receiver) {
+        if (property === isPigrettoProxy) {
+          return true;
+        } else if (property === PIGRETTO_EFFECTIVE_TARGET_PROP) {
+          return privateScope[PIGRETTO_EFFECTIVE_TARGET_PROP];
         }
-      : {}),
-    ...(trap.hasSets()
-      ? {
-          // Trap for property access (setting).
-          set(target, property, value, receiver) {
-            const updateWasSuccessful = trap.set(
-              target,
-              property,
-              value,
-              receiver
-            );
-            return updateWasSuccessful;
-          },
+        let propertyValue;
+        if (trap.hasGets()) {
+          propertyValue = trap.get(target, property, receiver);
+        } else {
+          propertyValue = reflectGet(target, property, receiver);
         }
-      : {}),
+        return propertyValue;
+      },
+    },
+    ...{
+      // Trap for property access (setting).
+      set(target, property, value, receiver) {
+        if (property === PIGRETTO_EFFECTIVE_TARGET_PROP) {
+          defineProperty(privateScope, PIGRETTO_EFFECTIVE_TARGET_PROP, {
+            value,
+          });
+          return true;
+        }
+        let updateWasSuccessful;
+        if (trap.hasSets()) {
+          updateWasSuccessful = trap.set(target, property, value, receiver);
+        } else {
+          updateWasSuccessful = reflectSet(target, property, value, receiver);
+        }
+        return updateWasSuccessful;
+      },
+    },
     ...(trap.hasApplies()
       ? {
           // Trap for function call.
