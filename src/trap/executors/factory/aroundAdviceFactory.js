@@ -56,8 +56,17 @@ export const proceedAPIAroundAdviceFactory = {
  */
 export const flatProceedAPIAroundAdviceFactory = {
   proceedWithinProceed: ({ trapExecutor, trapArgs, next, context }) => {
-    const returnValue = next(trapArgs);
-    trapExecutor.mutateFlatProceedContext(trapArgs, context);
+    let returnValue;
+    let hasMutatedContext = false;
+    try {
+      returnValue = next(trapArgs);
+      trapExecutor.mutateFlatProceedContext(trapArgs, context);
+      hasMutatedContext = true;
+    } catch (e) {
+      !hasMutatedContext &&
+        trapExecutor.mutateFlatProceedContext(trapArgs, context);
+      throw e;
+    }
     return returnValue;
   },
   proceedOutOfProceed: ({ returnValue }) => returnValue,
