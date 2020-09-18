@@ -35,6 +35,7 @@ import lazyObject from "./builtin/lazyObject";
 import throwErrorForUnknownProperty from "./builtin/throwErrorForUnknownProperty";
 import POJOPromiser from "./builtin/POJOPromiser";
 import arrayWithNegativeIndices from "./builtin/arrayWithNegativeIndices";
+import { PIGRETTO_EFFECTIVE_TARGET_PROP } from "./constants";
 
 /*
  * Mapping the API properties to the pigretto function.
@@ -58,6 +59,11 @@ pigretto.builtin = {};
   ["arrayWithNegativeIndices", arrayWithNegativeIndices],
 ].map(([prop, val]) => (pigretto.builtin[prop] = val));
 
+pigretto.constants = {};
+[["PIGRETTO_EFFECTIVE_TARGET_PROP", PIGRETTO_EFFECTIVE_TARGET_PROP]].map(
+  ([prop, val]) => (pigretto.constants[prop] = val)
+);
+
 export default pigretto;
 export { call, get, set, applyRule, apply, constructRule, construct };
 export {
@@ -66,3 +72,4 @@ export {
   POJOPromiser,
   arrayWithNegativeIndices,
 };
+export { PIGRETTO_EFFECTIVE_TARGET_PROP };
