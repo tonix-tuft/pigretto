@@ -57,10 +57,13 @@ export default class GetTrapExecutor extends TrapExecutor {
       rule,
       flat: advice.flat,
     });
-    const returnValue = this.notWithinExecContext(() => {
-      const returnValue = advice.fn.apply(context, [proceed]);
-      return returnValue;
-    });
+    const returnValue = this.notWithinExecContext(
+      ({ proceed }) => {
+        const returnValue = advice.fn.apply(context, [proceed]);
+        return returnValue;
+      },
+      { proceed }
+    );
     return returnValue;
   }
 
@@ -93,8 +96,7 @@ export default class GetTrapExecutor extends TrapExecutor {
         const propertyValue = reflectGet(target, property, receiver);
         return propertyValue;
       },
-      target,
-      true
+      { target, isPerformingUnderlyingOperation: true }
     );
     return propertyValue;
   }

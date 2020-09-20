@@ -50,10 +50,13 @@ export default class SetTrapExecutor extends TrapExecutor {
         this.execContextID
       )
     ) {
-      const previousPropertyValue = this.notWithinExecContext(() => {
-        const previousPropertyValue = reflectGet(target, property, receiver);
-        return previousPropertyValue;
-      }, target);
+      const previousPropertyValue = this.notWithinExecContext(
+        () => {
+          const previousPropertyValue = reflectGet(target, property, receiver);
+          return previousPropertyValue;
+        },
+        { target }
+      );
       this.previousPropertyValueMap[this.execContextID] = previousPropertyValue;
       this.returnNewPropertyValueMap[this.execContextID] = noValue;
       this.updateWasSuccessfulMap[this.execContextID] = false;
@@ -120,12 +123,15 @@ export default class SetTrapExecutor extends TrapExecutor {
       rule,
       flat: advice.flat,
     });
-    const returnValue = this.notWithinExecContext(() => {
-      const returnValue = advice.fn
-        .call(context, proceed)
-        .apply(context, [previousPropertyValue]);
-      return returnValue;
-    });
+    const returnValue = this.notWithinExecContext(
+      ({ proceed }) => {
+        const returnValue = advice.fn
+          .call(context, proceed)
+          .apply(context, [previousPropertyValue]);
+        return returnValue;
+      },
+      { proceed }
+    );
     return returnValue;
   }
 
@@ -175,8 +181,7 @@ export default class SetTrapExecutor extends TrapExecutor {
         );
         return updateWasSuccessful;
       },
-      target,
-      true
+      { target, isPerformingUnderlyingOperation: true }
     );
     this.updateWasSuccessfulMap[this.execContextID] = updateWasSuccessful;
     this.returnNewPropertyValueMap[this.execContextID] = value;

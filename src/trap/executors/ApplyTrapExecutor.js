@@ -61,12 +61,15 @@ export default withFunctionTrapExecutor(
         rule,
         flat: advice.flat,
       });
-      const returnValue = this.notWithinExecContext(() => {
-        const returnValue = advice.fn
-          .call(context, proceed)
-          .apply(context, argumentsList);
-        return returnValue;
-      });
+      const returnValue = this.notWithinExecContext(
+        ({ proceed }) => {
+          const returnValue = advice.fn
+            .call(context, proceed)
+            .apply(context, argumentsList);
+          return returnValue;
+        },
+        { proceed }
+      );
       return returnValue;
     }
 
@@ -81,10 +84,11 @@ export default withFunctionTrapExecutor(
         effectiveTarget: target[PIGRETTO_EFFECTIVE_TARGET_PROP] || target,
         thisArg,
         rule,
-        effectiveArgumentsList: TrapExecutor.getTransversalExecContextStackData(
-          "finalParams",
-          argumentsList
-        ),
+        effectiveArgumentsList:
+          TrapExecutor.getTransversalExecContextStackData(
+            "finalParams",
+            argumentsList
+          ) || [],
         hasPerformedUnderlyingOperation: this.execContextStack[
           this.execContextID
         ].hasPerformedUnderlyingOperation,
@@ -103,8 +107,7 @@ export default withFunctionTrapExecutor(
           const returnValue = reflectApply(target, thisArg, argumentsList);
           return returnValue;
         },
-        target,
-        true
+        { target, isPerformingUnderlyingOperation: true }
       );
       return returnValue;
     }
@@ -121,10 +124,11 @@ export default withFunctionTrapExecutor(
         thisArg,
         rule,
         argumentsList,
-        effectiveArgumentsList: TrapExecutor.getTransversalExecContextStackData(
-          "finalParams",
-          argumentsList
-        ),
+        effectiveArgumentsList:
+          TrapExecutor.getTransversalExecContextStackData(
+            "finalParams",
+            argumentsList
+          ) || [],
         hasPerformedUnderlyingOperation: this.execContextStack[
           this.execContextID
         ].hasPerformedUnderlyingOperation,

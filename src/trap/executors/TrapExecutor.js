@@ -122,12 +122,11 @@ export default class TrapExecutor {
 
   notWithinExecContext(
     callback,
-    target = void 0,
-    isPerformingUnderlyingOperation = false
+    { target = void 0, isPerformingUnderlyingOperation = false, proceed } = {}
   ) {
     const current = TrapExecutor.isWithinExecContext;
     const isTargetPigrettoProxy = target && target[isPigrettoProxy];
-    if (isPerformingUnderlyingOperation && !isTargetPigrettoProxy && target) {
+    if (isPerformingUnderlyingOperation && target && !isTargetPigrettoProxy) {
       TrapExecutor.transversalExecContextStack[
         TrapExecutor.transversalExecContextID
       ].hasEffectivelyPerformedUnderlyingOperation = true;
@@ -135,7 +134,11 @@ export default class TrapExecutor {
     if (!isTargetPigrettoProxy) {
       TrapExecutor.isWithinExecContext = false;
     }
-    const returnValue = callback();
+    const wrappedProceed = (...args) => {
+      TrapExecutor.isWithinExecContext = current;
+      return proceed(...args);
+    };
+    const returnValue = callback({ proceed: wrappedProceed });
     TrapExecutor.isWithinExecContext = current;
     return returnValue;
   }

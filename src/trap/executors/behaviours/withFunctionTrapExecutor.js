@@ -146,10 +146,11 @@ export const withFunctionTrapExecutor = superclass => {
       const argumentsList = trapArgs[trapArgsArgumentsListIndex];
       shallowExtend(context, {
         argumentsList,
-        effectiveArgumentsList: TrapExecutor.getTransversalExecContextStackData(
-          "finalParams",
-          argumentsList
-        ),
+        effectiveArgumentsList:
+          TrapExecutor.getTransversalExecContextStackData(
+            "finalParams",
+            argumentsList
+          ) || [],
         hasPerformedUnderlyingOperation: this.execContextStack[
           this.execContextID
         ].hasPerformedUnderlyingOperation,
