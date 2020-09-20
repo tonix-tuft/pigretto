@@ -210,6 +210,7 @@ export default class SetTrapExecutor extends TrapExecutor {
       hasEffectivelyPerformedUnderlyingOperation: TrapExecutor.getTransversalExecContextStackData(
         "hasEffectivelyPerformedUnderlyingOperation"
       ),
+      updateWasSuccessful: this.updateWasSuccessfulMap[this.execContextID],
     };
     const returnValue = this.notWithinExecContext(() => {
       return callback.apply(context, [newPropertyValue]);
@@ -232,6 +233,13 @@ export default class SetTrapExecutor extends TrapExecutor {
       ]);
     }
     return this.updateWasSuccessfulMap[this.execContextID];
+  }
+
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-empty-function
+  mutateFlatProceedContext(trapArgs, context) {
+    shallowExtend(context, {
+      updateWasSuccessful: this.updateWasSuccessfulMap[this.execContextID],
+    });
   }
 
   onProceed(finalParams) {
