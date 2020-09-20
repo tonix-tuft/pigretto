@@ -135,8 +135,11 @@ export default class TrapExecutor {
       TrapExecutor.isWithinExecContext = false;
     }
     const wrappedProceed = (...args) => {
+      const snapshot = TrapExecutor.isWithinExecContext;
       TrapExecutor.isWithinExecContext = current;
-      return proceed(...args);
+      const returnValue = proceed(...args);
+      TrapExecutor.isWithinExecContext = snapshot;
+      return returnValue;
     };
     const returnValue = callback({ proceed: wrappedProceed });
     TrapExecutor.isWithinExecContext = current;
