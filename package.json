@@ -18,11 +18,11 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "WEBPACK_ENV=watch webpack --progress --colors --watch",
+    "watch": "WEBPACK_ENV=watch webpack --progress --color --watch",
     "clear-build": "rm -Rf ./dist && mkdir ./dist",
-    "dev-build": "WEBPACK_ENV=dev webpack --progress --colors",
+    "dev-build": "WEBPACK_ENV=dev webpack --progress --color",
     "build": "WEBPACK_ENV=build webpack",
-    "dev-build-ie11": "WEBPACK_ENV=dev webpack --progress --colors --config webpack.config.ie11.js",
+    "dev-build-ie11": "WEBPACK_ENV=dev webpack --progress --color --config webpack.config.ie11.js",
     "build-ie11": "WEBPACK_ENV=build webpack --config webpack.config.ie11.js",
     "build-all-ie11": "npm run build-ie11 && npm run dev-build-ie11",
     "publish-git": "npm publish && git push && git push --tags",
@@ -51,7 +51,7 @@
     "terser-webpack-plugin": "^3.1.0",
     "typescript": "^3.9.7",
     "webpack": "^5.45.1",
-    "webpack-cli": "^3.3.12"
+    "webpack-cli": "^4.8.0"
   },
   "bugs": {
     "url": "https://github.com/tonix-tuft/pigretto/issues"
