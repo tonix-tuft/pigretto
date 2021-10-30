@@ -6,6 +6,7 @@ const srcEntryPoint = "index.js";
 const path = require("path");
 
 const TerserPlugin = require("terser-webpack-plugin");
+const ESLintPlugin = require("eslint-webpack-plugin");
 const env = process.env.WEBPACK_ENV;
 
 if (env === "build") {
@@ -17,6 +18,12 @@ if (env === "build") {
 var config = {
   entry: __dirname + "/src/" + srcEntryPoint,
   devtool: "source-map",
+  plugins: [
+    new ESLintPlugin({
+      extensions: [`js`, `jsx`],
+      exclude: [`/node_modules/`],
+    }),
+  ],
   output: {
     path: path.resolve(__dirname, "./dist"),
     filename: outputFile,
@@ -49,11 +56,6 @@ var config = {
             },
           ],
         },
-      },
-      {
-        test: /(\.jsx|\.js)$/,
-        loader: "eslint-loader",
-        exclude: /node_modules/,
       },
     ],
   },
